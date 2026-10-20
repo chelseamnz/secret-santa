@@ -1,0 +1,79 @@
+@import "./tokens.css";
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body { margin: 0; padding: 0; }
+
+body {
+  background: var(--color-bg-page);
+  color: var(--color-text-primary);
+  font-family: var(--font-family-body);
+  font-size: var(--font-size-md);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Wine-and-cream stripes used in headers and side panels */
+.stripes {
+  background: repeating-linear-gradient(
+    90deg,
+    var(--color-decor-stripe-primary) 0 16px,
+    color-mix(in srgb, var(--color-bg-card) 16%, var(--color-decor-stripe-primary)) 16px 24px
+  );
+}
+
+/* Notched postcard: corner cut-outs + inner rule */
+.postcard {
+  position: relative;
+  background: var(--color-bg-card);
+  box-shadow: var(--shadow-paper);
+  --notch: 16px;
+  -webkit-mask:
+    radial-gradient(circle var(--notch) at 0 0, #0000 98%, #000) top left,
+    radial-gradient(circle var(--notch) at 100% 0, #0000 98%, #000) top right,
+    radial-gradient(circle var(--notch) at 0 100%, #0000 98%, #000) bottom left,
+    radial-gradient(circle var(--notch) at 100% 100%, #0000 98%, #000) bottom right;
+  -webkit-mask-size: 51% 51%;
+  -webkit-mask-repeat: no-repeat;
+  mask:
+    radial-gradient(circle var(--notch) at 0 0, #0000 98%, #000) top left,
+    radial-gradient(circle var(--notch) at 100% 0, #0000 98%, #000) top right,
+    radial-gradient(circle var(--notch) at 0 100%, #0000 98%, #000) bottom left,
+    radial-gradient(circle var(--notch) at 100% 100%, #0000 98%, #000) bottom right;
+  mask-size: 51% 51%;
+  mask-repeat: no-repeat;
+}
+.postcard::after {
+  content: "";
+  position: absolute;
+  inset: 6px;
+  border: 1.2px solid var(--color-text-primary);
+  border-radius: 10px;
+  pointer-events: none;
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: var(--spacing-sm) var(--spacing-lg);
+  border: 0;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  text-decoration: none;
+}
+.button--primary { background: var(--color-action-primary-bg); color: var(--color-action-primary-text); }
+.button--secondary {
+  background: transparent;
+  color: var(--color-action-secondary-text);
+  box-shadow: inset 0 0 0 var(--border-width-thin) var(--color-action-secondary-border);
+}
+
+:focus-visible {
+  outline: var(--border-width-selected) solid var(--color-text-accent);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
