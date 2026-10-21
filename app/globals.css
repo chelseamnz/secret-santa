@@ -68,6 +68,16 @@ body {
   color: var(--color-action-secondary-text);
   box-shadow: inset 0 0 0 var(--border-width-thin) var(--color-action-secondary-border);
 }
+.button--destructive { background: var(--color-action-destructive-bg); color: var(--color-action-destructive-text); }
+.button--danger-outline {
+  background: transparent;
+  color: var(--color-text-accent);
+  box-shadow: inset 0 0 0 var(--border-width-thin) var(--color-action-destructive-bg);
+}
+.button--disabled,
+.button:disabled { background: var(--color-bg-tag); color: var(--color-text-secondary); box-shadow: none; cursor: not-allowed; }
+.button--small { min-height: 36px; padding: var(--spacing-xs) var(--spacing-md); }
+a.button { text-decoration: none; }
 
 :focus-visible {
   outline: var(--border-width-selected) solid var(--color-text-accent);
