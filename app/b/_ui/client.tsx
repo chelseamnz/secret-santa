@@ -21,12 +21,18 @@ export function CleanUrl() {
   return null;
 }
 
-// Each beat gets time to land. Total ≈ 8s, then a soft fade to the tree.
+// Each beat gets time to land. Total ≈ 9.5s, then a soft fade to the tree.
 const SCENES = [
   { caption: "Tucking in your letter…", ms: 2200 },
   { caption: "Sealing it with wax…", ms: 1900 },
   { caption: "Tucked under your ribbon…", ms: 2000 },
-  { caption: "Off it goes, under the tree!", ms: 2600 },
+  { caption: "Off it goes, under the tree!", ms: 3800 },
+];
+// Twinkles around the tree once the box lands: [left, top, size, delay(s)].
+const SPARKLES: [number, number, number, number][] = [
+  [52, 120, 18, 2.0], [204, 88, 22, 2.15], [132, 34, 16, 2.3], [78, 220, 14, 2.4],
+  [214, 196, 20, 2.25], [104, 296, 16, 2.1], [182, 286, 18, 2.45], [30, 268, 12, 2.55],
+  [150, 150, 12, 2.6], [236, 260, 14, 2.35],
 ];
 const FADE_MS = 700;
 
@@ -74,13 +80,14 @@ export function WrapMoment({
       <div className="moment__stage">
         {scene === 0 && (
           <div className="moment__scene" key="s0">
+            <img className="moment__envelope" src="/assets/envelope-green-opened.webp" alt="" />
             <div className="moment__letter letter-m">
               <span>Dear Santa,</span>
               <span className="moment__letter-text">{letter || "Merry Christmas!"}</span>
               <span>Love,</span>
               <span className="moment__letter-sign script-m">{name}</span>
             </div>
-            <img className="moment__envelope" src="/assets/envelope-green-opened.webp" alt="" />
+            <img className="moment__envelope moment__envelope--front" src="/assets/envelope-green-opened.webp" alt="" />
           </div>
         )}
         {scene === 1 && (
@@ -104,10 +111,12 @@ export function WrapMoment({
           <div className="moment__scene moment__scene--tree" key="s3">
             <img className="moment__tree sticker" src="/assets/tree.webp" alt="" />
             <GiftBox paper={paper} bow={bow} className="moment__drop sticker" />
-            <span className="sparkle sp1" aria-hidden />
-            <span className="sparkle sp2" aria-hidden />
-            <span className="sparkle sp3" aria-hidden />
-            <span className="sparkle sp4" aria-hidden />
+            {SPARKLES.map(([x, y, size, delay], i) => (
+              <svg key={i} className="sparkle" viewBox="0 0 24 24" aria-hidden
+                style={{ left: x, top: y, width: size, height: size, animationDelay: `${delay}s` }}>
+                <path d="M12 0C13 8 16 11 24 12 16 13 13 16 12 24 11 16 8 13 0 12 8 11 11 8 12 0Z" />
+              </svg>
+            ))}
           </div>
         )}
       </div>
