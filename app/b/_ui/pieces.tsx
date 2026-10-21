@@ -107,6 +107,7 @@ export function StepShell({
   bow,
   caption,
   wide,
+  enter,
   children,
 }: {
   name: string;
@@ -114,10 +115,12 @@ export function StepShell({
   bow: string;
   caption: string;
   wide?: boolean;
+  /** Fade the page in (used after the reveal). */
+  enter?: boolean;
   children: ReactNode;
 }) {
   return (
-    <main className="step">
+    <main className={`step ${enter ? "step--enter" : ""}`}>
       <header className="step__top">
         <img className="step__tree" src={asset("tree")} alt="" aria-hidden />
         <GiftBox paper={paper} bow={bow} tag={name} className="step__box sticker" />

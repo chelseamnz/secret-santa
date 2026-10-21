@@ -50,7 +50,7 @@ export default async function GifteePage({ params, searchParams }: { params: Pro
   return (
     <>
       {preview && <PreviewBanner />}
-      <StepShell name={gifteeName} paper={box.paper} bow={box.bow} caption={`${gifteeName}'s box, unwrapped.`} wide>
+      <StepShell name={gifteeName} paper={box.paper} bow={box.bow} caption={`${gifteeName}'s box, unwrapped.`} wide enter>
         <div className="pc-shadow">
           <div className="postcard pc step-form giftee">
             <StepHead

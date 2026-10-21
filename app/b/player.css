@@ -135,12 +135,15 @@ b { font-weight: var(--font-weight-semibold); }
 
 /* ---------- Steps 1–3 and the edit hub */
 .step { min-height: 100dvh; background: var(--color-bg-page); display: grid; grid-template-rows: auto 1fr; }
-.step__top { position: relative; height: 215px; overflow: hidden; display: flex; flex-direction: column; align-items: center; }
-.step__tree { position: absolute; width: 520px; max-width: none; left: 50%; top: -646px; transform: translateX(-50%); pointer-events: none;
+.step__top { position: relative; height: 290px; overflow: hidden; display: flex; flex-direction: column; align-items: center; }
+.step__tree { position: absolute; width: 520px; max-width: none; left: 50%; top: -546px; transform: translateX(-50%); pointer-events: none;
   filter: drop-shadow(1px 0 0 var(--color-bg-card)) drop-shadow(-1px 0 0 var(--color-bg-card)) drop-shadow(0 1px 0 var(--color-bg-card)); }
-.step__box { position: relative; margin-top: 20px; width: 112px; flex: none; }
+.step__box { position: relative; margin-top: 72px; width: 112px; flex: none; }
 .step__caption { position: relative; margin: auto 0 12px; color: var(--color-text-accent); text-align: center; padding: 0 16px; }
 .step__band { padding: 52px 16px 48px; }
+/* after the reveal: the unwrapped box fades in and the card rises a touch */
+.step--enter { animation: fade-in 0.9s cubic-bezier(.45, .05, .55, .95) both; }
+.step--enter .step__card { animation: caption-in 1.1s cubic-bezier(.22, 1, .36, 1) 0.15s both; }
 .step__card { max-width: 640px; margin: 0 auto; }
 .step__card--wide { max-width: 912px; }
 .step-form { padding: var(--spacing-lg); gap: var(--spacing-md); }
@@ -461,41 +464,61 @@ textarea.input { resize: vertical; min-height: 96px; }
 }
 .preview-banner a { color: inherit; }
 
-/* ---------- The reveal (sealed red envelope → "You're Santa for") */
-.reveal { min-height: 100dvh; display: grid; grid-template-rows: 72px 1fr 72px; background: var(--color-bg-page); }
+/* ---------- The reveal (sealed red envelope → letter opener → "You're Santa for") */
+.reveal {
+  --ease-arrive: cubic-bezier(.22, 1, .36, 1);
+  --ease-glide: cubic-bezier(.45, .05, .55, .95);
+  min-height: 100dvh; display: grid; grid-template-rows: 72px 1fr 72px; background: var(--color-bg-page);
+  transition: opacity 0.65s var(--ease-glide);
+}
+.reveal.is-leaving { opacity: 0; }
 .reveal__body { display: grid; align-content: center; justify-items: center; gap: 20px; padding: 24px 16px; text-align: center; }
-.reveal__head { display: grid; gap: 10px; }
+.reveal__head { display: grid; gap: 10px; animation: caption-in 1s var(--ease-arrive) both; }
 .reveal__head p { margin: 0; }
-.reveal__title { margin: 0; font-family: var(--font-family-script); font-weight: var(--font-weight-regular); font-size: 36px; line-height: 1.2; color: var(--color-text-primary); animation: caption-in 0.8s ease-out both; }
-.reveal__caption { margin: 0; color: var(--color-text-accent); animation: caption-in 0.6s ease-out both; }
-.reveal__stage { position: relative; width: 300px; height: 300px; display: grid; place-items: center; }
-.reveal__sealed { position: relative; padding: 0; border: 0; background: none; cursor: pointer; width: 290px; animation: rise-in 0.8s ease-out both; }
-.reveal__sealed .sealed-env__paper { filter: drop-shadow(0 8px 14px rgb(51 31 20 / 0.22)); }
-.reveal__sealed:not(:disabled):hover { transform: translateY(-2px); transition: transform 0.2s; }
-.is-crack .reveal__sealed { animation: shake 0.5s ease-in-out 0.25s 2; }
-/* gold flash and little cracks around the wax seal */
-.reveal__crack { position: absolute; left: 50%; top: 64%; width: 0; height: 0; }
-.reveal__crack::before {
-  content: ""; position: absolute; left: -46px; top: -46px; width: 92px; height: 92px; border-radius: 50%;
-  background: radial-gradient(circle, rgb(255 236 170 / 0.95), rgb(240 190 70 / 0.5) 45%, transparent 70%);
-  animation: flash 1.1s ease-out 0.5s both;
+.reveal__title { margin: 0; font-family: var(--font-family-script); font-weight: var(--font-weight-regular); font-size: 36px; line-height: 1.2; color: var(--color-text-primary); }
+.reveal__caption { margin: 0; color: var(--color-text-accent); animation: caption-in 1s var(--ease-arrive) both; }
+.reveal__stage { position: relative; width: 300px; height: 300px; display: grid; place-items: center; animation: fade-in 0.9s var(--ease-glide) both; }
+/* between beats: the current beat and its caption fade out together */
+.reveal.is-exiting .reveal__stage,
+.reveal.is-exiting .reveal__caption,
+.reveal.is-exiting .reveal__skip { animation: beat-out 0.8s var(--ease-glide) forwards; }
+.reveal__sealed { position: relative; padding: 0; border: 0; background: none; cursor: pointer; align-self: start; margin-top: 12px; }
+.reveal__sealed:disabled { cursor: default; }
+.reveal__sealed:not(:disabled):hover { transform: translateY(-2px); transition: transform 0.3s var(--ease-arrive); }
+
+/* Letter opener: the envelope photo, the opener, then the flap drawn again on top so
+   the blade slips under it. Positions come from the four opener frames. */
+.opener-stage { position: relative; width: 262px; aspect-ratio: 2640 / 2400; }
+.opener-stage__env { position: absolute; inset: 0; width: 100%; height: 100%; filter: drop-shadow(0 8px 14px rgb(51 31 20 / 0.18)); }
+.opener-stage__flap { filter: none; clip-path: polygon(0 0, 0.95% 0.25%, 49.92% 39%, 98.86% 0.25%, 100% 0); }
+.opener-stage__tool {
+  position: absolute; left: 73.636%; top: 20.125%; width: 23.712%;
+  transform-origin: 44.533% 47.77%;
+  animation: opener-in 1.1s var(--ease-arrive) 0.2s both, opener-slice 2.6s linear 1.3s both;
 }
-.reveal__crack i {
-  position: absolute; left: -2px; top: -2px; width: 4px; height: 18px; border-radius: 2px; background: var(--color-gold-500);
-  transform-origin: 2px 2px; opacity: 0;
+@keyframes opener-in {
+  from { opacity: 0; transform: translate(-95.885%, 45%) rotate(24deg); }
+  to { opacity: 1; transform: translate(-95.885%, 14.741%) rotate(18deg); }
 }
-.reveal__crack i::after { content: ""; }
-.reveal__crack i { animation: crack-out 0.8s ease-out 0.55s both; }
-.reveal__opened { position: relative; width: 300px; height: 300px; }
-.reveal__env { position: absolute; left: 25px; bottom: 0; width: 250px; z-index: 0; animation: fade-in 0.5s ease-out both; }
+/* the opener's four poses, with an ease in at the start and out at the end */
+@keyframes opener-slice {
+  0% { transform: translate(-95.885%, 14.741%) rotate(18deg); animation-timing-function: cubic-bezier(.55, 0, .9, .6); }
+  33% { transform: translate(-61.999%, 11.202%) rotate(10.5deg); animation-timing-function: linear; }
+  66% { transform: translate(-28.812%, 6.8%) rotate(5.5deg); animation-timing-function: cubic-bezier(.1, .4, .45, 1); }
+  100% { transform: translate(0, 0) rotate(0deg); }
+}
+
+.reveal__opened { position: relative; width: 300px; height: 300px; overflow: hidden; }
+.reveal__env { position: absolute; left: 25px; bottom: 0; width: 250px; z-index: 0; }
 .reveal__env--front { z-index: 2; clip-path: polygon(0 43.5%, 38% 63.5%, 62% 63.5%, 100% 43.5%, 100% 100%, 0 100%); }
 .reveal-card-wrap {
-  position: absolute; z-index: 1; left: 15px; top: 14px; width: 270px;
+  position: absolute; z-index: 1; left: 0; right: 0; top: 14px; margin: 0 auto;
+  width: fit-content; min-width: 236px; max-width: 290px;
   transform: translateY(116px) scale(0.72); filter: drop-shadow(0 8px 12px rgb(51 31 20 / 0.22));
 }
-.reveal-card-wrap.is-out { z-index: 3; animation: card-out 2s linear both; }
+.reveal-card-wrap.is-out { z-index: 3; animation: card-out 2.4s linear both; }
 .reveal-card {
-  --notch: 14px; position: relative; display: grid; justify-items: center; gap: 2px; padding: 18px 16px 16px;
+  --notch: 12px; position: relative; display: grid; justify-items: center; gap: 4px; padding: 18px 28px 16px;
   background: var(--color-bg-card);
   -webkit-mask:
     radial-gradient(circle var(--notch) at 0 0, #0000 98%, #000) top left,
@@ -510,19 +533,18 @@ textarea.input { resize: vertical; min-height: 96px; }
     radial-gradient(circle var(--notch) at 100% 100%, #0000 98%, #000) bottom right;
   mask-size: 51% 51%; mask-repeat: no-repeat;
 }
-.reveal-card::after { content: ""; position: absolute; inset: 6px; border: 1px solid var(--color-text-accent); border-radius: 8px; pointer-events: none; }
+.reveal-card::after { content: ""; position: absolute; inset: 6px; border: 1px solid var(--color-text-accent); border-radius: 6px; pointer-events: none; }
 .reveal-card__bells { width: 44px; height: 48px; background: url(/assets/bells.webp) center / contain no-repeat; }
-.reveal-card__name { font-family: var(--font-family-script); font-size: 48px; line-height: 1.15; color: var(--color-text-primary); }
-.is-out .reveal-card__name { animation: name-in 1.1s ease-out 1.8s both; }
+.reveal-card__name { font-family: var(--font-family-script); font-size: 48px; line-height: 1.15; color: var(--color-text-primary); white-space: nowrap; }
+.reveal-card__name.is-mid { font-size: 40px; }
+.reveal-card__name.is-long { font-size: 32px; white-space: normal; max-width: 240px; }
+.is-out .reveal-card__name { animation: name-in 1.4s var(--ease-arrive) 1.1s both; }
 .reveal__opened .sparkle { z-index: 4; }
 .reveal__actions { display: grid; gap: 12px; justify-items: center; }
 .reveal__actions p { margin: 0; }
-.reveal__actions--late { animation: caption-in 0.6s ease-out 2.8s both; }
+.reveal__actions--late { animation: caption-in 0.9s var(--ease-arrive) 2.6s both; }
 .reveal__skip { margin: 0; }
 
-@keyframes shake { 0%, 100% { transform: rotate(0); } 25% { transform: rotate(-1.2deg); } 75% { transform: rotate(1.2deg); } }
-@keyframes flash { 0% { opacity: 0; transform: scale(0.3); } 35% { opacity: 1; transform: scale(1.1); } 100% { opacity: 0; transform: scale(1.4); } }
-@keyframes crack-out { 0% { opacity: 0; scale: 0.5; } 30% { opacity: 1; } 100% { opacity: 0; scale: 1.35; } }
 /* rises inside the pocket (behind the front), then steps in front once clear */
 @keyframes card-out {
   0% { transform: translateY(116px) scale(0.72); z-index: 1; animation-timing-function: cubic-bezier(.45, 0, .55, 1); }
@@ -530,7 +552,7 @@ textarea.input { resize: vertical; min-height: 96px; }
   58% { transform: translateY(-14px) scale(0.93); z-index: 3; animation-timing-function: cubic-bezier(.3, 0, .3, 1); }
   100% { transform: translateY(0) scale(1); z-index: 3; }
 }
-@keyframes name-in { from { opacity: 0; filter: blur(4px); letter-spacing: 0.08em; } }
+@keyframes name-in { from { opacity: 0; filter: blur(2px); transform: translateY(4px); } }
 
 /* ---------- Unwrapped box (read-only) */
 .giftee__cols { display: grid; gap: var(--spacing-lg); }
@@ -596,9 +618,9 @@ textarea.input { resize: vertical; min-height: 96px; }
   .spot { width: calc(64 / 660 * 100%); z-index: var(--d-z); }
   .stage__caption { font-size: var(--font-size-2xl); }
 
-  .step__top { height: 228px; }
-  .step__tree { width: 690px; top: -927px; }
-  .step__box { width: 120px; margin-top: 28px; }
+  .step__top { height: 312px; }
+  .step__tree { width: 690px; top: -781px; }
+  .step__box { width: 120px; margin-top: 84px; }
   .step__band { padding: 86px 24px 64px; }
   .step-form { padding: 24px 28px 28px; }
   .swatches { grid-template-columns: repeat(9, 1fr); grid-template-rows: none; overflow: visible; margin: 0; padding: 0; }
@@ -629,6 +651,7 @@ textarea.input { resize: vertical; min-height: 96px; }
   .moment__scene { transform: scale(1.5); }
 
   .reveal { grid-template-rows: 64px 1fr 64px; }
+  .reveal__stage { transform: scale(1.35); margin: 40px 0; }
   .reveal__title { font-size: 44px; }
   .giftee__cols { grid-template-columns: 1fr 1fr; align-items: start; }
   .detail:has(.detail__photo) { grid-template-columns: 180px 1fr; align-items: start; }

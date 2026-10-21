@@ -1,29 +1,52 @@
 "use client";
 
-// The sealed red envelope and the reveal: seal cracks → flap opens → the card
-// slides up out of the pocket with your giftee's name. Tap to skip ahead.
-import Link from "next/link";
+// The sealed red envelope and the reveal:
+//   1. a gold letter opener slips under the flap and slices along it
+//   2. the envelope opens
+//   3. the card rises out of the pocket with your giftee's name
+// Each beat fades out before the next. Tap to skip ahead.
+import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { openEnvelope } from "../[token]/actions";
-import { SealedEnvelope } from "./pieces";
 
-type Stage = "sealed" | "crack" | "open" | "card";
-const CRACK_MS = 1400;
-const OPEN_MS = 1300;
+type Stage = "sealed" | "slice" | "open" | "card";
+const SLICE_MS = 4600;
+const OPEN_MS = 2600;
+const EXIT_MS = 800;
+const LEAVE_MS = 650;
 
 const SPARKS: [number, number, number, number][] = [
-  [6, 40, 22, 1.8], [262, 26, 26, 1.95], [30, 150, 16, 2.1], [252, 140, 18, 2.0],
-  [140, 6, 18, 2.2], [96, 190, 14, 2.3], [200, 196, 14, 2.15],
+  [6, 40, 22, 2.0], [262, 26, 26, 2.15], [30, 150, 16, 2.3], [252, 140, 18, 2.2],
+  [140, 4, 18, 2.4], [96, 190, 14, 2.5], [200, 196, 14, 2.35],
 ];
+
+/** Sealed envelope photo from the opener frames; the opener and flap layer on top. */
+function OpenerStage({ slicing }: { slicing: boolean }) {
+  return (
+    <div className={`opener-stage ${slicing ? "is-slicing" : ""}`} aria-hidden>
+      <img className="opener-stage__env" src="/assets/envelope-red-opener-stage.webp" alt="" />
+      {slicing && <img className="opener-stage__tool" src="/assets/letter-opener.webp" alt="" />}
+      {slicing && <img className="opener-stage__env opener-stage__flap" src="/assets/envelope-red-opener-stage.webp" alt="" />}
+    </div>
+  );
+}
 
 export function RevealEnvelope({
   token, me, giftee, preview,
 }: { token: string; me: string; giftee: string; preview: boolean }) {
+  const router = useRouter();
   const [stage, setStage] = useState<Stage>("sealed");
+  const [exiting, setExiting] = useState(false);
+  const [leaving, setLeaving] = useState(false);
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
-  const q = preview ? "?preview=1" : "";
+  const href = `/b/${token}/giftee${preview ? "?preview=1" : ""}`;
 
-  useEffect(() => () => timers.current.forEach(clearTimeout), []);
+  useEffect(() => {
+    router.prefetch(href);
+    return () => timers.current.forEach(clearTimeout);
+  }, [router, href]);
+
+  const at = (ms: number, fn: () => void) => timers.current.push(setTimeout(fn, ms));
 
   function start() {
     if (stage !== "sealed") return;
@@ -32,23 +55,33 @@ export function RevealEnvelope({
       setStage("card");
       return;
     }
-    setStage("crack");
-    timers.current.push(setTimeout(() => setStage("open"), CRACK_MS));
-    timers.current.push(setTimeout(() => setStage("card"), CRACK_MS + OPEN_MS));
+    setStage("slice");
+    at(SLICE_MS - EXIT_MS, () => setExiting(true));
+    at(SLICE_MS, () => { setExiting(false); setStage("open"); });
+    at(SLICE_MS + OPEN_MS - EXIT_MS, () => setExiting(true));
+    at(SLICE_MS + OPEN_MS, () => { setExiting(false); setStage("card"); });
   }
 
   function skip() {
-    if (stage === "crack" || stage === "open") {
+    if (stage === "slice" || stage === "open") {
       timers.current.forEach(clearTimeout);
+      setExiting(false);
       setStage("card");
     }
   }
 
-  const caption =
-    stage === "sealed" ? null : stage === "crack" ? "The seal cracks…" : stage === "open" ? "Opening…" : null;
+  function seeBox(e: React.MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    setLeaving(true);
+    setTimeout(() => router.push(href), LEAVE_MS);
+  }
+
+  const caption = stage === "slice" ? "Slicing it open…" : stage === "open" ? "Opening…" : null;
+  const nameSize = giftee.length > 16 ? "is-long" : giftee.length > 11 ? "is-mid" : "";
 
   return (
-    <main className="reveal" onClick={skip}>
+    <main className={`reveal ${exiting ? "is-exiting" : ""} ${leaving ? "is-leaving" : ""}`} onClick={skip}>
       <div className="reveal__band stripes" aria-hidden />
       <section className="reveal__body">
         {stage === "sealed" && (
@@ -59,28 +92,25 @@ export function RevealEnvelope({
         )}
         {caption && <p className="reveal__caption script-m" key={stage}>{caption}</p>}
 
-        <div className={`reveal__stage is-${stage}`}>
-          {(stage === "sealed" || stage === "crack") && (
+        <div className={`reveal__stage is-${stage}`} key={`stage-${stage === "slice" ? "sealed" : stage}`}>
+          {(stage === "sealed" || stage === "slice") && (
             <button type="button" className="reveal__sealed" onClick={start} aria-label="Break the seal" disabled={stage !== "sealed"}>
-              <SealedEnvelope color="red" />
-              {stage === "crack" && (
-                <span className="reveal__crack" aria-hidden>
-                  {Array.from({ length: 8 }, (_, i) => <i key={i} style={{ transform: `rotate(${i * 45 + 20}deg) translateY(-40px)` }} />)}
-                </span>
-              )}
+              <OpenerStage slicing={stage === "slice"} />
             </button>
           )}
 
           {(stage === "open" || stage === "card") && (
             <div className="reveal__opened">
               <img className="reveal__env" src="/assets/envelope-red-opened.webp" alt="" />
-              <div className={`reveal-card-wrap ${stage === "card" ? "is-out" : ""}`}>
-                <div className="reveal-card">
-                  <span className="reveal-card__bells" aria-hidden />
-                  <span className="label-m accent">You&apos;re Santa for</span>
-                  <span className="reveal-card__name">{giftee}</span>
+              {stage === "card" && (
+                <div className="reveal-card-wrap is-out">
+                  <div className="reveal-card">
+                    <span className="reveal-card__bells" aria-hidden />
+                    <span className="label-m accent">You&apos;re Santa for</span>
+                    <span className={`reveal-card__name ${nameSize}`}>{giftee}</span>
+                  </div>
                 </div>
-              </div>
+              )}
               <img className="reveal__env reveal__env--front" src="/assets/envelope-red-opened.webp" alt="" />
               {stage === "card" &&
                 SPARKS.map(([x, y, s, d], i) => (
@@ -101,10 +131,10 @@ export function RevealEnvelope({
         )}
         {stage === "card" && (
           <div className="reveal__actions reveal__actions--late">
-            <Link href={`/b/${token}/giftee${q}`} className="button button--primary button-m">See {giftee}&apos;s box</Link>
+            <a href={href} onClick={seeBox} className="button button--primary button-m">See {giftee}&apos;s box</a>
           </div>
         )}
-        {(stage === "crack" || stage === "open") && <p className="reveal__skip label-s muted">Tap to skip</p>}
+        {(stage === "slice" || stage === "open") && <p className="reveal__skip label-s muted">Tap to skip</p>}
       </section>
       <div className="reveal__band stripes" aria-hidden />
     </main>
