@@ -621,7 +621,8 @@ textarea.input { resize: vertical; min-height: 96px; }
   .sheet[open] { animation: fade-in 0.15s ease-out; }
   .sheet__inner { padding: 28px 28px 28px; outline: 1.2px solid var(--color-text-primary); outline-offset: -8px; border-radius: 10px; }
   .sheet__handle { display: none; }
-  .moment__scene--tree { transform: scale(1.5); }
+  /* desktop: every beat of the wrapping moment at the same, larger size */
+  .moment__scene { transform: scale(1.5); }
 
   .reveal { grid-template-rows: 64px 1fr 64px; }
   .reveal__title { font-size: 44px; }
