@@ -27,15 +27,21 @@ export function Toast({ message, tone = "notice" }: { message: string; tone?: "n
 
 // ---------- Copy link
 
+// Messenger won't preview *.vercel.app links, so the link goes out with a short note.
+const inviteMessage = (name: string, url: string) =>
+  `🎄 Hi ${name}! Here's your Secret Santa link. Wrap your box, add your wishes, and write a little letter to your Santa. ` +
+  `This link is just for you, so please don't forward it. 🎁\n${url}`;
+
 export function CopyLinkButton({ url, name, compact }: { url: string; name: string; compact?: boolean }) {
   const [copied, setCopied] = useState(false);
   async function copy() {
+    const text = inviteMessage(name, url);
     try {
-      await navigator.clipboard.writeText(url);
+      await navigator.clipboard.writeText(text);
     } catch {
       // Older browsers: fall back to a temporary text field.
       const ta = document.createElement("textarea");
-      ta.value = url;
+      ta.value = text;
       document.body.appendChild(ta);
       ta.select();
       document.execCommand("copy");
@@ -53,7 +59,7 @@ export function CopyLinkButton({ url, name, compact }: { url: string; name: stri
       >
         Copy link
       </button>
-      {copied && <Toast message={`${name}'s link copied — paste it in their Messenger chat`} />}
+      {copied && <Toast message={`${name}'s message and link copied — paste it in their Messenger chat`} />}
     </>
   );
 }
