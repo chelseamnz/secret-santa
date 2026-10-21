@@ -26,15 +26,27 @@ const SCENES = [
   { caption: "Tucking in your letter…", ms: 4000 },
   { caption: "Sealing it with wax…", ms: 4000 },
   { caption: "Tucked under your ribbon…", ms: 4000 },
-  { caption: "Off it goes, under the tree!", ms: 6800 },
+  { caption: "Off it goes, under the tree!", ms: 7400 },
 ];
 // Twinkles around the tree once the box lands: [left, top, size, delay(s)].
 const SPARKLES: [number, number, number, number][] = [
-  [44, 112, 28, 3.4], [200, 80, 32, 3.6], [126, 22, 24, 3.8], [70, 214, 22, 3.95],
-  [210, 190, 28, 3.7], [96, 290, 24, 3.5], [178, 280, 26, 4.0], [22, 262, 18, 4.1],
-  [146, 146, 20, 4.2], [234, 254, 20, 3.85],
+  [44, 112, 28, 4.0], [200, 80, 32, 4.2], [126, 22, 24, 4.4], [70, 214, 22, 4.55],
+  [210, 190, 28, 4.3], [96, 290, 24, 4.1], [178, 280, 26, 4.6], [22, 262, 18, 4.7],
+  [146, 146, 20, 4.8], [234, 254, 20, 4.45],
 ];
 const FADE_MS = 1000;
+
+// Fairy lights around the sealed envelope: an oval of small warm lights that
+// blink on one by one. [left, top, delay(s)] in the 280×340 scene.
+const FAIRY_LIGHTS: [number, number, number][] = Array.from({ length: 18 }, (_, i) => {
+  const a = (i / 18) * Math.PI * 2 + 0.15;
+  const wobble = i % 2 ? 7 : -5;
+  return [
+    Math.round(140 + Math.cos(a) * (142 + wobble)) - 4,
+    Math.round(170 + Math.sin(a) * (96 + wobble)) - 4,
+    +(2.35 + ((i * 7) % 18) * 0.07).toFixed(2),
+  ];
+});
 
 /** The wrapping moment after "Wrap it up". Tap anywhere to skip. */
 export function WrapMoment({
@@ -91,13 +103,11 @@ export function WrapMoment({
           </div>
         )}
         {scene === 1 && (
-          <div className="moment__scene" key="s1">
-            <svg className="moment__hearts" viewBox="0 0 120 100" aria-hidden>
-              <path className="h1" d="M28 62c-14-10-20-22-12-30 6-6 13-1 14 6 2-8 10-11 15-5 7 9-4 21-17 29z" />
-              <path className="h2" d="M72 30c-10-7-14-16-8-21 4-4 9-1 10 4 1-5 7-8 11-4 5 6-3 15-13 21z" />
-              <path className="h3" d="M78 86c-12-8-17-18-10-25 5-5 11-1 12 5 2-7 9-9 13-4 6 7-3 17-15 24z" />
-            </svg>
-            <img className="moment__opened-out" src="/assets/envelope-green-opened.webp" alt="" />
+          <div className="moment__scene moment__scene--seal" key="s1">
+            <span className="moment__warm" aria-hidden />
+            {FAIRY_LIGHTS.map(([x, y, d], i) => (
+              <span key={i} className="fairy" aria-hidden style={{ left: x, top: y, animationDelay: `${d}s, ${d + 0.9}s` }} />
+            ))}
             <SealedEnvelope color="green" stamp="press" className="moment__sealed" />
           </div>
         )}

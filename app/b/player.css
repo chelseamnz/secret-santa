@@ -344,17 +344,25 @@ textarea.input { resize: vertical; min-height: 96px; }
 .moment__envelope { position: absolute; bottom: 10px; width: 216px; z-index: 0; animation: rise-in 1.2s var(--ease-arrive) both; }
 .moment__envelope--front { z-index: 2; clip-path: polygon(0 43.5%, 38% 63.5%, 62% 63.5%, 100% 43.5%, 100% 100%, 0 100%); }
 
-/* 2 · the open envelope gives way to the sealed one, the wax stamp lifts in,
-   presses down, the envelope gives a small bump, and hearts float up */
-.moment__opened-out { position: absolute; width: 216px; animation: fade-out 0.9s var(--ease-glide) both; }
-.moment__sealed { width: 220px; animation: fade-in 0.9s var(--ease-glide) both; }
-.moment__sealed .sealed-env__seal.is-press { animation: wax-press 1.6s var(--ease-press) 0.9s both; }
-.moment__sealed.is-pressing .sealed-env__paper { animation: seal 0.9s var(--ease-arrive) 1.75s both; }
-.moment__hearts { position: absolute; top: 6px; width: 96px; fill: none; stroke: var(--color-text-accent); stroke-width: 3; stroke-linecap: round; }
-.moment__hearts path { opacity: 0; animation: heart-up 1.5s var(--ease-arrive) both; }
-.moment__hearts .h1 { animation-delay: 2.0s; }
-.moment__hearts .h2 { animation-delay: 2.25s; }
-.moment__hearts .h3 { animation-delay: 2.5s; }
+/* 2 · the sealed envelope is set down like a letter on a table, the wax seal
+   fades in and presses on, then a warm glow and fairy lights come on around it */
+.moment__sealed { position: relative; z-index: 2; width: 220px; animation: set-down 1.4s var(--ease-arrive) both; }
+.moment__sealed .sealed-env__paper { filter: drop-shadow(0 6px 10px rgb(51 31 20 / 0.18)); }
+.moment__sealed .sealed-env__seal.is-press { animation: wax-on 1.3s var(--ease-arrive) 1.2s both; }
+.moment__scene--seal .moment__sealed .sealed-env__paper { animation: env-glow 2.4s var(--ease-glide) 2.2s forwards; }
+.moment__warm {
+  position: absolute; inset: 40px -40px; z-index: 0; pointer-events: none; opacity: 0;
+  background: radial-gradient(closest-side, rgb(255 214 120 / 0.5), rgb(255 214 120 / 0.16) 60%, transparent 80%);
+  animation: halo 2.4s var(--ease-glide) 2.2s forwards;
+}
+.fairy {
+  position: absolute; z-index: 1; width: 8px; height: 8px; border-radius: 50%; opacity: 0;
+  background: radial-gradient(circle, #fffbe6 0 30%, #ffd978 60%, #f2b445 100%);
+  box-shadow: 0 0 6px 2px rgb(255 205 100 / 0.9), 0 0 16px 4px rgb(255 190 80 / 0.45);
+  animation: fairy-on 0.9s var(--ease-arrive) both, fairy-flicker 2.2s var(--ease-glide) infinite both;
+}
+.fairy:nth-child(3n) { width: 6px; height: 6px; }
+.fairy:nth-child(4n) { animation-duration: 0.9s, 1.7s; }
 
 /* 3 · the box rises in, the envelope glides under the ribbon, the tag swings on */
 .moment__scene--box .moment__box { width: 160px; animation: box-in 1.3s var(--ease-arrive) both; }
@@ -366,10 +374,10 @@ textarea.input { resize: vertical; min-height: 96px; }
 .moment__scene--tree::before {
   content: ""; position: absolute; inset: -40px -60px 0; z-index: 0; pointer-events: none;
   background: radial-gradient(closest-side, rgb(255 214 120 / 0.55), rgb(255 214 120 / 0.18) 55%, transparent 75%);
-  opacity: 0; animation: halo 3.2s var(--ease-glide) 3.3s forwards;
+  opacity: 0; animation: halo 3.2s var(--ease-glide) 3.9s forwards;
 }
-.moment__tree { position: relative; z-index: 1; width: 220px; animation: fade-in 1.2s var(--ease-glide) both, tree-glow 3.2s var(--ease-glide) 3.3s forwards; }
-.moment__drop { position: absolute; z-index: 2; width: 62px; bottom: 6px; animation: drop 2.6s var(--ease-glide) 0.7s both; }
+.moment__tree { position: relative; z-index: 1; width: 220px; animation: tree-in 1.6s var(--ease-arrive) both, tree-glow 3.2s var(--ease-glide) 3.9s forwards; }
+.moment__drop { position: absolute; z-index: 2; width: 62px; bottom: 6px; animation: drop 2.4s var(--ease-glide) 1.4s both; }
 .sparkle {
   position: absolute; z-index: 3; opacity: 0; fill: #ffd85c; stroke: #fffbe8; stroke-width: 1.2;
   filter: drop-shadow(0 0 3px #fff4c8) drop-shadow(0 0 9px rgb(240 180 50 / 0.95));
@@ -377,6 +385,23 @@ textarea.input { resize: vertical; min-height: 96px; }
 }
 
 @keyframes fade-in { from { opacity: 0; } }
+@keyframes set-down {
+  0% { opacity: 0; transform: translateY(-26px) scale(1.06) rotate(-2deg); }
+  60% { opacity: 1; }
+  100% { opacity: 1; transform: translateY(0) scale(1) rotate(0deg); }
+}
+@keyframes wax-on {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(1.35); }
+  55% { opacity: 1; transform: translate(-50%, -50%) scale(0.96); }
+  100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+@keyframes env-glow {
+  0% { filter: drop-shadow(0 6px 10px rgb(51 31 20 / 0.18)); }
+  100% { filter: brightness(1.06) drop-shadow(0 0 18px rgb(255 210 110 / 0.75)) drop-shadow(0 6px 10px rgb(51 31 20 / 0.12)); }
+}
+@keyframes fairy-on { 0% { opacity: 0; transform: scale(0.2); } 100% { opacity: 1; transform: scale(1); } }
+@keyframes fairy-flicker { 0%, 100% { filter: brightness(1); } 50% { filter: brightness(0.7); } }
+@keyframes tree-in { 0% { opacity: 0; transform: translateY(-110%); } 30% { opacity: 1; } 100% { opacity: 1; transform: translateY(0); } }
 @keyframes fade-out { to { opacity: 0; } }
 @keyframes caption-in { from { opacity: 0; transform: translateY(6px); } }
 @keyframes rise-in { from { opacity: 0; transform: translateY(24px); } }
@@ -596,6 +621,7 @@ textarea.input { resize: vertical; min-height: 96px; }
   .sheet[open] { animation: fade-in 0.15s ease-out; }
   .sheet__inner { padding: 28px 28px 28px; outline: 1.2px solid var(--color-text-primary); outline-offset: -8px; border-radius: 10px; }
   .sheet__handle { display: none; }
+  .moment__scene--tree { transform: scale(1.5); }
 
   .reveal { grid-template-rows: 64px 1fr 64px; }
   .reveal__title { font-size: 44px; }
