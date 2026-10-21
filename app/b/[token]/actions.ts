@@ -12,9 +12,8 @@ export type ActionResult = { ok: boolean; error?: string };
 
 // Every action starts here: the private link is the only key.
 async function player(token: string): Promise<Player> {
-  const p = await getPlayer(token);
+  const [p, s] = await Promise.all([getPlayer(token), getSettings()]);
   if (!p) throw new Error("This link doesn't work anymore.");
-  const s = await getSettings();
   if (!canEdit(s)) throw new Error("Boxes are sealed for Christmas — no more changes.");
   return p;
 }
