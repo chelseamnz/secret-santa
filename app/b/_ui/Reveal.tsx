@@ -4,7 +4,7 @@
 //   1. a gold letter opener slips under the flap and slices along it
 //   2. the envelope opens
 //   3. the card rises out of the pocket with your giftee's name
-// Each beat fades out before the next. Tap to skip ahead.
+// Each beat fades out before the next. It plays through without skipping.
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { openEnvelope } from "../[token]/actions";
@@ -64,15 +64,6 @@ export function RevealEnvelope({
     at(SLICE_MS + OPEN_MS, () => setStage("card"));
   }
 
-  function skip() {
-    if (stage === "slice" || stage === "open") {
-      timers.current.forEach(clearTimeout);
-      setExiting(false);
-      setCaptionOut(true);
-      setStage("card");
-    }
-  }
-
   function seeBox(e: React.MouseEvent) {
     e.preventDefault();
     e.stopPropagation();
@@ -84,7 +75,7 @@ export function RevealEnvelope({
   const nameSize = giftee.length > 16 ? "is-long" : giftee.length > 11 ? "is-mid" : "";
 
   return (
-    <main className={`reveal ${exiting ? "is-exiting" : ""} ${captionOut ? "is-caption-out" : ""} ${leaving ? "is-leaving" : ""}`} onClick={skip}>
+    <main className={`reveal ${exiting ? "is-exiting" : ""} ${captionOut ? "is-caption-out" : ""} ${leaving ? "is-leaving" : ""}`}>
       <div className="reveal__band stripes" aria-hidden />
       <section className="reveal__body">
         {stage === "sealed" && (
@@ -137,7 +128,6 @@ export function RevealEnvelope({
             <a href={href} onClick={seeBox} className="button button--primary button-m">See {giftee}&apos;s box</a>
           </div>
         )}
-        {(stage === "slice" || stage === "open") && <p className="reveal__skip label-s muted">Tap to skip</p>}
       </section>
       <div className="reveal__band stripes" aria-hidden />
     </main>

@@ -49,7 +49,7 @@ const FAIRY_LIGHTS: [number, number, number][] = Array.from({ length: 18 }, (_, 
   ];
 });
 
-/** The wrapping moment after "Wrap it up". Tap anywhere to skip. */
+/** The wrapping moment after "Wrap it up". Plays through; it can't be skipped. */
 export function WrapMoment({
   name,
   paper,
@@ -84,14 +84,10 @@ export function WrapMoment({
     return () => timers.forEach(clearTimeout);
   }, []);
 
-  function skip() {
-    setLeaving(true);
-    setTimeout(() => setDone(true), 600);
-  }
 
   if (done) return null;
   return (
-    <div className={`moment ${leaving ? "is-leaving" : ""} ${exiting ? "is-exiting" : ""}`} onClick={skip} role="dialog" aria-label="Wrapping your box">
+    <div className={`moment ${leaving ? "is-leaving" : ""} ${exiting ? "is-exiting" : ""}`} role="dialog" aria-label="Wrapping your box">
       <p className="moment__caption script-m" key={scene}>{SCENES[scene].caption}</p>
       <div className="moment__stage">
         {scene === 0 && (
@@ -134,7 +130,6 @@ export function WrapMoment({
           </div>
         )}
       </div>
-      <p className="moment__skip label-s">Tap to skip</p>
     </div>
   );
 }

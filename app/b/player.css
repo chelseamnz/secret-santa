@@ -321,8 +321,8 @@ textarea.input { resize: vertical; min-height: 96px; }
   --ease-glide: cubic-bezier(.45, .05, .55, .95);
   --ease-press: cubic-bezier(.55, 0, .25, 1);
   --ease-swing: cubic-bezier(.34, 1.45, .64, 1);
-  position: fixed; inset: 0; z-index: 5000; background: var(--color-bg-page); cursor: pointer;
-  display: grid; grid-template-rows: auto 1fr auto; padding: 16dvh 24px 28px;
+  position: fixed; inset: 0; z-index: 5000; background: var(--color-bg-page);
+  display: grid; grid-template-rows: auto 1fr; padding: 16dvh 24px 10dvh;
   animation: fade-in 0.9s var(--ease-glide); transition: opacity 1s var(--ease-glide);
 }
 .moment.is-leaving { opacity: 0; }
