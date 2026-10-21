@@ -1,23 +1,27 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useFormStatus } from "react-dom";
+import { createPortal, useFormStatus } from "react-dom";
 
 // ---------- Toast (bottom-center, 3 seconds)
+// Rendered into <body> through a portal so a masked postcard can't clip it.
 
 export function Toast({ message, tone = "notice" }: { message: string; tone?: "notice" | "error" }) {
   const [shown, setShown] = useState(true);
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
   useEffect(() => {
     setShown(true);
     const t = setTimeout(() => setShown(false), tone === "error" ? 6000 : 3500);
     return () => clearTimeout(t);
   }, [message, tone]);
-  if (!shown) return null;
-  return (
+  if (!shown || !mounted) return null;
+  return createPortal(
     <div className={`toast toast--${tone}`} role={tone === "error" ? "alert" : "status"}>
       {tone === "notice" ? "✓ " : ""}
       {message}
-    </div>
+    </div>,
+    document.body,
   );
 }
 
