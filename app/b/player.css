@@ -30,7 +30,7 @@ b { font-weight: var(--font-weight-semibold); }
 .giftbox__box { inset: 0; width: 100%; height: 100%; }
 .giftbox__bow { left: 15%; top: 0; width: 74%; }
 .giftbox__tag { position: absolute; left: 44%; top: 57%; transform: rotate(-6deg); font-size: 12cqw; filter: drop-shadow(0 2px 2px rgb(51 31 20 / 0.25)); }
-.giftbox__tag .tag { padding: 0.25em 0.7em 0.35em 0.95em; }
+.giftbox__tag .tag { padding: 0.25em 0.75em 0.35em; }
 .giftbox__tag .tag__name { font-size: 1em; }
 
 /* ---------- Name tag (notched, with a punched hole) */
@@ -39,7 +39,7 @@ b { font-weight: var(--font-weight-semibold); }
   position: relative;
   display: inline-grid;
   justify-items: center;
-  padding: 6px 20px 8px 28px;
+  padding: 6px 22px 8px;
   background: var(--color-bg-card);
   white-space: nowrap;
   -webkit-mask:
@@ -58,7 +58,6 @@ b { font-weight: var(--font-weight-semibold); }
   mask-repeat: no-repeat;
 }
 .tag::after { content: ""; position: absolute; inset: 4px; border: 1px solid var(--color-text-accent); border-radius: 3px; pointer-events: none; }
-.tag::before { content: ""; position: absolute; left: 10px; top: 50%; width: 6px; height: 6px; margin-top: -3px; border-radius: 50%; background: var(--color-bg-page); }
 .tag__name { font-family: var(--font-family-script); font-size: var(--font-size-2xl); line-height: 1.2; color: var(--color-text-accent); }
 .tag__sub { font-family: var(--font-family-typewriter); font-size: var(--font-size-xs); letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-text-secondary); }
 .tag--waiting .tag__name { color: var(--color-text-secondary); }
