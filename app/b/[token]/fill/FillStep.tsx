@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useOptimistic, useRef, useState, useTransition } from "react";
+import { useRef, useState, useTransition } from "react";
 import { HEART_IDEAS, capitalize, formatPeso, numberWord } from "@/lib/catalog";
 import type { Wish } from "@/lib/player";
 import { addHeartIdea, deleteWish, toggleHeart } from "../actions";
@@ -18,29 +18,34 @@ export function FillStep({
 }) {
   const [tab, setTab] = useState<Tab>(initialTab);
   const [sheet, setSheet] = useState<{ wish: Wish | null; n: number } | null>(null);
-  const [heartState, setHeart] = useOptimistic(heart, (cur: Wish[], change: { key?: string; id?: string; on: boolean }) => {
-    if (change.on && change.key) {
-      const idea = HEART_IDEAS.find((h) => h.slug === change.key)!;
-      return [...cur, { id: `tmp-${change.key}`, heart_key: change.key, title: idea.label, kind: "heart" } as Wish];
-    }
-    return cur.filter((w) => (change.key ? w.heart_key !== change.key : w.id !== change.id));
-  });
-  const [, startTransition] = useTransition();
+  // Heart picks: the checkmarks are the source of truth on this page and update
+  // instantly; saves run one after another so quick taps never get lost.
+  const [keys, setKeys] = useState(() => new Set(heart.filter((w) => w.heart_key).map((w) => w.heart_key!)));
+  const [removed, setRemoved] = useState<Set<string>>(new Set());
+  const queue = useRef<Promise<unknown>>(Promise.resolve());
   const [error, setError] = useState<string | null>(null);
+  const custom = heart.filter((w) => !w.heart_key && !removed.has(w.id));
+  const heartCount = keys.size + custom.length;
 
-  const total = store.length + heartState.length;
-  const caption = total === 0 ? "An empty box, ready to fill." : `${capitalize(numberWord(total))} ${total === 1 ? "wish" : "wishes"} packed inside.`;
-
-  function flipHeart(change: { key?: string; id?: string; on: boolean }) {
+  function save(run: () => Promise<{ ok: boolean; error?: string }>, undo: () => void) {
     setError(null);
-    startTransition(async () => {
-      setHeart(change);
-      const res = change.key
-        ? await toggleHeart(token, change.key, change.on)
-        : await deleteWish(token, change.id!);
-      if (!res.ok) setError(res.error ?? "Couldn't save that.");
+    queue.current = queue.current.then(async () => {
+      const res = await run().catch(() => ({ ok: false, error: "Couldn't save that. Check your connection." }));
+      if (!res.ok) { undo(); setError(res.error ?? "Couldn't save that."); }
     });
   }
+  function flipKey(key: string, on: boolean) {
+    const set = (v: boolean) => setKeys((cur) => { const n = new Set(cur); if (v) n.add(key); else n.delete(key); return n; });
+    set(on);
+    save(() => toggleHeart(token, key, on), () => set(!on));
+  }
+  function removeCustom(id: string) {
+    setRemoved((cur) => new Set(cur).add(id));
+    save(() => deleteWish(token, id), () => setRemoved((cur) => { const n = new Set(cur); n.delete(id); return n; }));
+  }
+
+  const total = store.length + heartCount;
+  const caption = total === 0 ? "An empty box, ready to fill." : `${capitalize(numberWord(total))} ${total === 1 ? "wish" : "wishes"} packed inside.`;
 
   return (
     <StepShell name={name} paper={paper} bow={bow} caption={caption}>
@@ -62,7 +67,7 @@ export function FillStep({
                 onClick={() => setTab(t)}
               >
                 <span className="button-m">{t === "store" ? "From the store" : "From the heart"}</span>
-                <span className="body-s">{t === "store" ? store.length : heartState.length}</span>
+                <span className="body-s">{t === "store" ? store.length : heartCount}</span>
               </button>
             ))}
           </div>
@@ -102,7 +107,7 @@ export function FillStep({
               </div>
             )
           ) : (
-            <HeartList wishes={heartState} onFlip={flipHeart} token={token} onError={setError} />
+            <HeartList keys={keys} custom={custom} onFlip={flipKey} onRemove={removeCustom} token={token} onError={setError} />
           )}
 
           {error && <p className="form-error body-s" role="alert">{error}</p>}
@@ -134,17 +139,18 @@ export function FillStep({
 }
 
 function HeartList({
-  wishes, onFlip, token, onError,
+  keys, custom, onFlip, onRemove, token, onError,
 }: {
-  wishes: Wish[];
-  onFlip: (c: { key?: string; id?: string; on: boolean }) => void;
+  keys: Set<string>;
+  custom: Wish[];
+  onFlip: (key: string, on: boolean) => void;
+  onRemove: (id: string) => void;
   token: string;
   onError: (e: string | null) => void;
 }) {
   const [adding, setAdding] = useState(false);
   const [pending, startTransition] = useTransition();
   const input = useRef<HTMLInputElement>(null);
-  const custom = wishes.filter((w) => !w.heart_key);
 
   function add() {
     const title = input.current?.value ?? "";
@@ -162,11 +168,11 @@ function HeartList({
       <p className="body-s muted">No-cost ideas anyone can give. Check the ones you&apos;d love.</p>
       <ul className="hearts__list">
         {HEART_IDEAS.map((h) => {
-          const on = wishes.some((w) => w.heart_key === h.slug);
+          const on = keys.has(h.slug);
           return (
             <li key={h.slug}>
               <label className="heart-opt">
-                <input type="checkbox" checked={on} onChange={(e) => onFlip({ key: h.slug, on: e.target.checked })} />
+                <input type="checkbox" checked={on} onChange={(e) => onFlip(h.slug, e.target.checked)} />
                 <span className="heart-opt__box" aria-hidden />
                 <span className="heart-opt__icon" style={{ backgroundImage: `url(/assets/heart-${h.slug}.webp)` }} aria-hidden />
                 <span className="button-m">{h.label}</span>
@@ -177,7 +183,7 @@ function HeartList({
         {custom.map((w) => (
           <li key={w.id}>
             <label className="heart-opt">
-              <input type="checkbox" checked onChange={() => onFlip({ id: w.id, on: false })} disabled={w.id.startsWith("tmp")} />
+              <input type="checkbox" checked onChange={() => onRemove(w.id)} />
               <span className="heart-opt__box" aria-hidden />
               <span className="heart-opt__icon heart-opt__icon--own" aria-hidden>♥</span>
               <span className="button-m">{w.title}</span>

@@ -45,7 +45,7 @@ export function LetterStep({
             <p className="letter-m letter-paper__love">Love,</p>
             <p className="script-m accent letter-paper__sign">{name}</p>
             <p className={`letter-paper__count body-s ${tooLong ? "accent" : "muted"}`} aria-live="polite">
-              <span className="label-s">{words.toLocaleString()} / {LETTER_MAX_WORDS.toLocaleString()} words</span>
+              <span>{words.toLocaleString()} / {LETTER_MAX_WORDS.toLocaleString()} words</span>
             </p>
           </div>
           {tooLong && <p className="form-error body-s">That&apos;s a little long — trim it to {LETTER_MAX_WORDS.toLocaleString()} words.</p>}

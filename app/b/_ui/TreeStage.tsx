@@ -26,11 +26,15 @@ const D_SPOTS = [
   [114, 622], [206, 614], [298, 622], [390, 614], [482, 622], [574, 614],
 ];
 
-// More than 13 people: add extra spots in a row below (rare).
-function spotAt(list: number[][], i: number, layout: typeof M): number[] {
+// More than 13 people: the stage grows and extra spots get their own rows below.
+const PER_ROW = 5;
+const extraRows = (n: number) => Math.max(0, Math.ceil((n - M_SPOTS.length) / PER_ROW));
+const grow = (l: typeof M, n: number) => ({ ...l, h: l.h + extraRows(n) * (l.bh + 8) });
+function spotAt(list: number[][], i: number, base: typeof M): number[] {
   if (i < list.length) return list[i];
   const extra = i - list.length;
-  return [(extra % 6) * (layout.bw + 8) + 8, layout.h - layout.bh + Math.floor(extra / 6) * 8];
+  const gap = (base.w - PER_ROW * base.bw) / (PER_ROW + 1);
+  return [gap + (extra % PER_ROW) * (base.bw + gap), base.h + 4 + Math.floor(extra / PER_ROW) * (base.bh + 8)];
 }
 
 const pct = (v: number, of: number) => `${(v / of) * 100}%`;
@@ -57,10 +61,12 @@ export function TreeStage({
     return () => document.removeEventListener("pointerdown", close);
   }, []);
 
+  const Mx = grow(M, spots.length);
+  const Dx = grow(D, spots.length);
   const [mt, dt] = [M.tree, D.tree];
   const treeStyle = {
-    "--m-l": pct(mt[0], M.w), "--m-t": pct(mt[1], M.h), "--m-w": pct(mt[2], M.w),
-    "--d-l": pct(dt[0], D.w), "--d-t": pct(dt[1], D.h), "--d-w": pct(dt[2], D.w),
+    "--m-l": pct(mt[0], M.w), "--m-t": pct(mt[1], Mx.h), "--m-w": pct(mt[2], M.w),
+    "--d-l": pct(dt[0], D.w), "--d-t": pct(dt[1], Dx.h), "--d-w": pct(dt[2], D.w),
   } as CSSProperties;
 
   const openSpot = spots.find((s) => s.id === open);
@@ -68,14 +74,14 @@ export function TreeStage({
 
   return (
     <div className="tree-wrap">
-      <div className="stage">
+      <div className="stage" style={{ "--m-ar": `${M.w} / ${Mx.h}`, "--d-ar": `${D.w} / ${Dx.h}`, "--d-h": Dx.h } as CSSProperties}>
         <img className="stage__tree sticker" src="/assets/tree.webp" alt="" style={treeStyle} />
         {spots.map((s, i) => {
           const [mx, my] = spotAt(M_SPOTS, i, M);
           const [dx, dy] = spotAt(D_SPOTS, i, D);
           const style = {
-            "--m-l": pct(mx, M.w), "--m-t": pct(my, M.h),
-            "--d-l": pct(dx, D.w), "--d-t": pct(dy, D.h),
+            "--m-l": pct(mx, M.w), "--m-t": pct(my, Mx.h),
+            "--d-l": pct(dx, D.w), "--d-t": pct(dy, Dx.h),
             "--m-z": my, "--d-z": dy,
           } as CSSProperties;
           const me = s.id === meId;
@@ -105,8 +111,8 @@ export function TreeStage({
           const [dx, dy] = spotAt(D_SPOTS, openIndex, D);
           const clamp = (x: number, w: number) => Math.min(Math.max(x, TAG_HALF), w - TAG_HALF);
           const style = {
-            "--m-l": pct(clamp(mx + M.bw / 2, M.w), M.w), "--m-t": pct(my + 10, M.h),
-            "--d-l": pct(clamp(dx + D.bw / 2, D.w), D.w), "--d-t": pct(dy + 10, D.h),
+            "--m-l": pct(clamp(mx + M.bw / 2, M.w), M.w), "--m-t": pct(my + 10, Mx.h),
+            "--d-l": pct(clamp(dx + D.bw / 2, D.w), D.w), "--d-t": pct(dy + 10, Dx.h),
           } as CSSProperties;
           return (
             <span className="stage__tag" style={style} role="status">

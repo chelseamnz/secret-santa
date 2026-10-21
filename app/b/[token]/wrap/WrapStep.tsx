@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { BOWS, PAPERS, bowLabel, paperLabel } from "@/lib/catalog";
 import { saveWrap } from "../actions";
@@ -31,10 +31,21 @@ export function WrapStep({
 }) {
   const [paper, setPaper] = useState(initialPaper);
   const [bow, setBow] = useState(initialBow);
+  const form = useRef<HTMLFormElement>(null);
+
+  // Phones: scroll each strip so the current choice is visible.
+  useEffect(() => {
+    form.current?.querySelectorAll<HTMLElement>(".swatches").forEach((strip) => {
+      const picked = strip.querySelector<HTMLElement>("input:checked")?.parentElement;
+      if (picked && strip.scrollWidth > strip.clientWidth) {
+        strip.scrollLeft = picked.offsetLeft - strip.clientWidth / 2 + picked.clientWidth / 2;
+      }
+    });
+  }, []);
 
   return (
     <StepShell name={name} paper={paper} bow={bow} caption="Here's yours under the tree." wide>
-      <div className="pc-shadow"><form action={saveWrap.bind(null, token)} className="postcard pc step-form">
+      <div className="pc-shadow"><form ref={form} action={saveWrap.bind(null, token)} className="postcard pc step-form">
         <input type="hidden" name="mode" value={editing ? "edit" : "new"} />
         <StepHead kicker={editing ? "Edit your wrapping" : "Step 1 of 3"} title="Wrap your box" />
 
