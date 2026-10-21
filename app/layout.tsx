@@ -2,7 +2,13 @@ import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 import "./globals.css";
 
+// Absolute URLs for link previews (Messenger needs full https links).
+const SITE = process.env.VERCEL_PROJECT_PRODUCTION_URL
+  ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+  : "http://localhost:3000";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE),
   title: "Secret Santa 2026",
   description:
     "Wrap your box, fill it with wishes, and join the family under the tree.",
