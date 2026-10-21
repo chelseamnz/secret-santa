@@ -295,6 +295,22 @@ textarea.input { resize: vertical; min-height: 96px; }
 .lost__card { width: min(420px, 100%); }
 .lost .pc { padding: 32px 24px; text-align: center; gap: 12px; }
 
+/* ---------- Sealed envelope + wax seal */
+.sealed-env { position: relative; display: block; }
+.sealed-env__paper { display: block; width: 100%; }
+.sealed-env__seal {
+  position: absolute; left: 50%; top: 64%; width: 24%; transform: translate(-50%, -50%);
+  filter: drop-shadow(0 2px 2px rgb(51 31 20 / 0.3));
+}
+/* the stamp comes down from above, presses in, and settles */
+.sealed-env__seal.is-press { animation: wax-press 0.95s cubic-bezier(.3, 0, .2, 1) 0.35s both; }
+@keyframes wax-press {
+  0% { opacity: 0; transform: translate(-50%, -50%) translateY(-70px) scale(2.3) rotate(-16deg); filter: drop-shadow(0 26px 14px rgb(51 31 20 / 0.25)); }
+  52% { opacity: 1; transform: translate(-50%, -50%) scale(0.9) rotate(0deg); filter: drop-shadow(0 1px 1px rgb(51 31 20 / 0.4)); }
+  70% { transform: translate(-50%, -50%) scale(1.05); }
+  100% { transform: translate(-50%, -50%) scale(1); filter: drop-shadow(0 2px 2px rgb(51 31 20 / 0.3)); }
+}
+
 /* ---------- Wrapping moment (after "Wrap it up") — about 8 seconds, four beats */
 .moment {
   position: fixed; inset: 0; z-index: 5000; background: var(--color-bg-page); cursor: pointer;
@@ -319,16 +335,17 @@ textarea.input { resize: vertical; min-height: 96px; }
 .moment__letter-text { display: -webkit-box; -webkit-line-clamp: 6; -webkit-box-orient: vertical; overflow: hidden; }
 .moment__letter-sign { font-size: 13px !important; color: var(--color-text-accent); }
 .moment__envelope { position: absolute; bottom: 10px; width: 216px; z-index: 0; animation: rise-in 0.6s ease-out both; }
-.moment__envelope--front { z-index: 2; clip-path: polygon(0 46.1%, 13.3% 46.1%, 49.8% 63.9%, 86.2% 46.1%, 100% 46.1%, 100% 100%, 0 100%); }
+.moment__envelope--front { z-index: 2; clip-path: polygon(0 43.5%, 38% 63.5%, 62% 63.5%, 100% 43.5%, 100% 100%, 0 100%); }
 
 /* 2 · flap closes, the seal presses in, hearts float up */
 .moment__opened-out { position: absolute; width: 216px; animation: fade-out 0.45s ease-in both; }
-.moment__sealed { width: 220px; animation: seal 1.2s ease-out 0.25s both; }
+.moment__sealed { width: 220px; }
+.moment__sealed.is-pressing .sealed-env__paper { animation: seal 0.6s ease-out 0.82s both; }
 .moment__hearts { position: absolute; top: 6px; width: 96px; fill: none; stroke: var(--color-text-accent); stroke-width: 3; stroke-linecap: round; }
 .moment__hearts path { opacity: 0; animation: heart-up 1.3s ease-out both; }
-.moment__hearts .h1 { animation-delay: 0.8s; }
-.moment__hearts .h2 { animation-delay: 1.0s; }
-.moment__hearts .h3 { animation-delay: 1.2s; }
+.moment__hearts .h1 { animation-delay: 1.1s; }
+.moment__hearts .h2 { animation-delay: 1.3s; }
+.moment__hearts .h3 { animation-delay: 1.5s; }
 
 /* 3 · the box appears, the envelope slides under the ribbon, the tag swings in */
 .moment__scene--box .moment__box { width: 160px; animation: box-in 0.7s cubic-bezier(.2, .8, .2, 1) both; }
@@ -410,11 +427,11 @@ textarea.input { resize: vertical; min-height: 96px; }
 .reveal__caption { margin: 0; color: var(--color-text-accent); animation: caption-in 0.6s ease-out both; }
 .reveal__stage { position: relative; width: 300px; height: 300px; display: grid; place-items: center; }
 .reveal__sealed { position: relative; padding: 0; border: 0; background: none; cursor: pointer; width: 290px; animation: rise-in 0.8s ease-out both; }
-.reveal__sealed img { width: 100%; display: block; filter: drop-shadow(0 8px 14px rgb(51 31 20 / 0.22)); }
+.reveal__sealed .sealed-env__paper { filter: drop-shadow(0 8px 14px rgb(51 31 20 / 0.22)); }
 .reveal__sealed:not(:disabled):hover { transform: translateY(-2px); transition: transform 0.2s; }
 .is-crack .reveal__sealed { animation: shake 0.5s ease-in-out 0.25s 2; }
 /* gold flash and little cracks around the wax seal */
-.reveal__crack { position: absolute; left: 50%; top: 66%; width: 0; height: 0; }
+.reveal__crack { position: absolute; left: 50%; top: 64%; width: 0; height: 0; }
 .reveal__crack::before {
   content: ""; position: absolute; left: -46px; top: -46px; width: 92px; height: 92px; border-radius: 50%;
   background: radial-gradient(circle, rgb(255 236 170 / 0.95), rgb(240 190 70 / 0.5) 45%, transparent 70%);
@@ -428,7 +445,7 @@ textarea.input { resize: vertical; min-height: 96px; }
 .reveal__crack i { animation: crack-out 0.8s ease-out 0.55s both; }
 .reveal__opened { position: relative; width: 300px; height: 300px; }
 .reveal__env { position: absolute; left: 25px; bottom: 0; width: 250px; z-index: 0; animation: fade-in 0.5s ease-out both; }
-.reveal__env--front { z-index: 2; clip-path: polygon(0 46.1%, 13.8% 46.1%, 50% 63.5%, 86.2% 46.1%, 100% 46.1%, 100% 100%, 0 100%); }
+.reveal__env--front { z-index: 2; clip-path: polygon(0 43.5%, 38% 63.5%, 62% 63.5%, 100% 43.5%, 100% 100%, 0 100%); }
 .reveal-card-wrap {
   position: absolute; z-index: 1; left: 15px; top: 14px; width: 270px;
   transform: translateY(116px) scale(0.72); filter: drop-shadow(0 8px 12px rgb(51 31 20 / 0.22));

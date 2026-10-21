@@ -32,6 +32,24 @@ export function GiftBox({
   );
 }
 
+/** Sealed envelope with the wax seal on top. "press" stamps it in (wrapping moment). */
+export function SealedEnvelope({
+  color,
+  stamp = "static",
+  className = "",
+}: {
+  color: "red" | "green";
+  stamp?: "static" | "press";
+  className?: string;
+}) {
+  return (
+    <span className={`sealed-env ${stamp === "press" ? "is-pressing" : ""} ${className}`} aria-hidden>
+      <img className="sealed-env__paper" src={asset(`envelope-${color}-sealed`)} alt="" draggable={false} />
+      <img className={`sealed-env__seal ${stamp === "press" ? "is-press" : ""}`} src={asset("wax-seal")} alt="" draggable={false} />
+    </span>
+  );
+}
+
 /** Notched gift tag. Posted = wine name; waiting = muted, dashed, "Still wrapping". */
 export function NameTag({
   name,

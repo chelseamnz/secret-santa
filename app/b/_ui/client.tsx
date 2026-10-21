@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { markOpened } from "../[token]/actions";
-import { GiftBox } from "./pieces";
+import { GiftBox, SealedEnvelope } from "./pieces";
 
 /** Marks the link as opened from the browser, so Messenger's link preview doesn't count. */
 export function OpenedPing({ token }: { token: string }) {
@@ -24,7 +24,7 @@ export function CleanUrl() {
 // Each beat gets time to land. Total ≈ 9.5s, then a soft fade to the tree.
 const SCENES = [
   { caption: "Tucking in your letter…", ms: 2200 },
-  { caption: "Sealing it with wax…", ms: 1900 },
+  { caption: "Sealing it with wax…", ms: 2400 },
   { caption: "Tucked under your ribbon…", ms: 2000 },
   { caption: "Off it goes, under the tree!", ms: 3800 },
 ];
@@ -98,13 +98,13 @@ export function WrapMoment({
               <path className="h3" d="M78 86c-12-8-17-18-10-25 5-5 11-1 12 5 2-7 9-9 13-4 6 7-3 17-15 24z" />
             </svg>
             <img className="moment__opened-out" src="/assets/envelope-green-opened.webp" alt="" />
-            <img className="moment__sealed" src="/assets/envelope-green-sealed.webp" alt="" />
+            <SealedEnvelope color="green" stamp="press" className="moment__sealed" />
           </div>
         )}
         {scene === 2 && (
           <div className="moment__scene moment__scene--box" key="s2">
             <GiftBox paper={paper} bow={bow} tag={name} className="moment__box sticker" />
-            <img className="moment__tucked" src="/assets/envelope-green-sealed.webp" alt="" />
+            <SealedEnvelope color="green" className="moment__tucked" />
           </div>
         )}
         {scene === 3 && (

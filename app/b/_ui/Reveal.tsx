@@ -5,6 +5,7 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { openEnvelope } from "../[token]/actions";
+import { SealedEnvelope } from "./pieces";
 
 type Stage = "sealed" | "crack" | "open" | "card";
 const CRACK_MS = 1400;
@@ -61,7 +62,7 @@ export function RevealEnvelope({
         <div className={`reveal__stage is-${stage}`}>
           {(stage === "sealed" || stage === "crack") && (
             <button type="button" className="reveal__sealed" onClick={start} aria-label="Break the seal" disabled={stage !== "sealed"}>
-              <img src="/assets/envelope-red-sealed.webp" alt="" />
+              <SealedEnvelope color="red" />
               {stage === "crack" && (
                 <span className="reveal__crack" aria-hidden>
                   {Array.from({ length: 8 }, (_, i) => <i key={i} style={{ transform: `rotate(${i * 45 + 20}deg) translateY(-40px)` }} />)}
