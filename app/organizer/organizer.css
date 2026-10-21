@@ -186,3 +186,7 @@
 }
 .toast--notice { background: var(--color-action-primary-bg); color: var(--color-action-primary-text); }
 .toast--error { background: var(--color-action-destructive-bg); color: var(--color-action-destructive-text); }
+
+.preview-link { justify-self: center; }
+.grow-space { flex: 1; }
+.pairs__row .link-action { min-height: 32px; }

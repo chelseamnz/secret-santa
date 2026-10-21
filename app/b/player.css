@@ -393,6 +393,120 @@ textarea.input { resize: vertical; min-height: 96px; }
 }
 @keyframes halo { 0% { opacity: 0; transform: scale(0.85); } 40% { opacity: 1; transform: scale(1.05); } 100% { opacity: 0.8; transform: scale(1); } }
 
+/* ---------- Preview banner (organizer rehearsal) */
+.preview-banner {
+  position: fixed; z-index: 6000; top: 8px; left: 50%; transform: translateX(-50%);
+  padding: 6px 12px; border-radius: 999px; white-space: nowrap;
+  background: var(--color-ink-900, #2b241f); color: var(--color-bg-card);
+}
+.preview-banner a { color: inherit; }
+
+/* ---------- The reveal (sealed red envelope → "You're Santa for") */
+.reveal { min-height: 100dvh; display: grid; grid-template-rows: 72px 1fr 72px; background: var(--color-bg-page); }
+.reveal__body { display: grid; align-content: center; justify-items: center; gap: 20px; padding: 24px 16px; text-align: center; }
+.reveal__head { display: grid; gap: 10px; }
+.reveal__head p { margin: 0; }
+.reveal__title { margin: 0; font-family: var(--font-family-script); font-weight: var(--font-weight-regular); font-size: 36px; line-height: 1.2; color: var(--color-text-primary); animation: caption-in 0.8s ease-out both; }
+.reveal__caption { margin: 0; color: var(--color-text-accent); animation: caption-in 0.6s ease-out both; }
+.reveal__stage { position: relative; width: 300px; height: 300px; display: grid; place-items: center; }
+.reveal__sealed { position: relative; padding: 0; border: 0; background: none; cursor: pointer; width: 290px; animation: rise-in 0.8s ease-out both; }
+.reveal__sealed img { width: 100%; display: block; filter: drop-shadow(0 8px 14px rgb(51 31 20 / 0.22)); }
+.reveal__sealed:not(:disabled):hover { transform: translateY(-2px); transition: transform 0.2s; }
+.is-crack .reveal__sealed { animation: shake 0.5s ease-in-out 0.25s 2; }
+/* gold flash and little cracks around the wax seal */
+.reveal__crack { position: absolute; left: 50%; top: 66%; width: 0; height: 0; }
+.reveal__crack::before {
+  content: ""; position: absolute; left: -46px; top: -46px; width: 92px; height: 92px; border-radius: 50%;
+  background: radial-gradient(circle, rgb(255 236 170 / 0.95), rgb(240 190 70 / 0.5) 45%, transparent 70%);
+  animation: flash 1.1s ease-out 0.5s both;
+}
+.reveal__crack i {
+  position: absolute; left: -2px; top: -2px; width: 4px; height: 18px; border-radius: 2px; background: var(--color-gold-500);
+  transform-origin: 2px 2px; opacity: 0;
+}
+.reveal__crack i::after { content: ""; }
+.reveal__crack i { animation: crack-out 0.8s ease-out 0.55s both; }
+.reveal__opened { position: relative; width: 300px; height: 300px; }
+.reveal__env { position: absolute; left: 25px; bottom: 0; width: 250px; z-index: 0; animation: fade-in 0.5s ease-out both; }
+.reveal__env--front { z-index: 2; clip-path: polygon(0 46.1%, 13.8% 46.1%, 50% 63.5%, 86.2% 46.1%, 100% 46.1%, 100% 100%, 0 100%); }
+.reveal-card-wrap {
+  position: absolute; z-index: 1; left: 15px; top: 14px; width: 270px;
+  transform: translateY(116px) scale(0.72); filter: drop-shadow(0 8px 12px rgb(51 31 20 / 0.22));
+}
+.reveal-card-wrap.is-out { z-index: 3; animation: card-out 2s linear both; }
+.reveal-card {
+  --notch: 14px; position: relative; display: grid; justify-items: center; gap: 2px; padding: 18px 16px 16px;
+  background: var(--color-bg-card);
+  -webkit-mask:
+    radial-gradient(circle var(--notch) at 0 0, #0000 98%, #000) top left,
+    radial-gradient(circle var(--notch) at 100% 0, #0000 98%, #000) top right,
+    radial-gradient(circle var(--notch) at 0 100%, #0000 98%, #000) bottom left,
+    radial-gradient(circle var(--notch) at 100% 100%, #0000 98%, #000) bottom right;
+  -webkit-mask-size: 51% 51%; -webkit-mask-repeat: no-repeat;
+  mask:
+    radial-gradient(circle var(--notch) at 0 0, #0000 98%, #000) top left,
+    radial-gradient(circle var(--notch) at 100% 0, #0000 98%, #000) top right,
+    radial-gradient(circle var(--notch) at 0 100%, #0000 98%, #000) bottom left,
+    radial-gradient(circle var(--notch) at 100% 100%, #0000 98%, #000) bottom right;
+  mask-size: 51% 51%; mask-repeat: no-repeat;
+}
+.reveal-card::after { content: ""; position: absolute; inset: 6px; border: 1px solid var(--color-text-accent); border-radius: 8px; pointer-events: none; }
+.reveal-card__bells { width: 44px; height: 48px; background: url(/assets/bells.webp) center / contain no-repeat; }
+.reveal-card__name { font-family: var(--font-family-script); font-size: 48px; line-height: 1.15; color: var(--color-text-primary); }
+.is-out .reveal-card__name { animation: name-in 1.1s ease-out 1.8s both; }
+.reveal__opened .sparkle { z-index: 4; }
+.reveal__actions { display: grid; gap: 12px; justify-items: center; }
+.reveal__actions p { margin: 0; }
+.reveal__actions--late { animation: caption-in 0.6s ease-out 2.8s both; }
+.reveal__skip { margin: 0; }
+
+@keyframes shake { 0%, 100% { transform: rotate(0); } 25% { transform: rotate(-1.2deg); } 75% { transform: rotate(1.2deg); } }
+@keyframes flash { 0% { opacity: 0; transform: scale(0.3); } 35% { opacity: 1; transform: scale(1.1); } 100% { opacity: 0; transform: scale(1.4); } }
+@keyframes crack-out { 0% { opacity: 0; scale: 0.5; } 30% { opacity: 1; } 100% { opacity: 0; scale: 1.35; } }
+/* rises inside the pocket (behind the front), then steps in front once clear */
+@keyframes card-out {
+  0% { transform: translateY(116px) scale(0.72); z-index: 1; animation-timing-function: cubic-bezier(.45, 0, .55, 1); }
+  48% { transform: translateY(20px) scale(0.84); z-index: 1; animation-timing-function: cubic-bezier(.3, 0, .3, 1); }
+  58% { transform: translateY(-14px) scale(0.93); z-index: 3; animation-timing-function: cubic-bezier(.3, 0, .3, 1); }
+  100% { transform: translateY(0) scale(1); z-index: 3; }
+}
+@keyframes name-in { from { opacity: 0; filter: blur(4px); letter-spacing: 0.08em; } }
+
+/* ---------- Unwrapped box (read-only) */
+.giftee__cols { display: grid; gap: var(--spacing-lg); }
+.giftee-section { display: grid; gap: 10px; align-content: start; }
+.giftee-section h3 { margin: 0; }
+.giftee-lists { display: grid; gap: var(--spacing-lg); align-content: start; }
+.letter-paper--read .letter-paper__body { white-space: pre-wrap; overflow-wrap: anywhere; color: var(--color-text-primary); }
+.letter-paper--read { gap: 12px; }
+.hearts__list--read { grid-template-columns: 1fr !important; }
+.heart-opt--read { cursor: default; }
+.greeting {
+  position: relative; display: grid; justify-items: center; gap: 6px; padding: 30px 24px 26px; text-align: center;
+  background: var(--color-bg-page); border-radius: var(--radius-sm);
+}
+.greeting::before {
+  content: ""; position: absolute; inset: 0; border-radius: var(--radius-sm); pointer-events: none;
+  padding: 10px; /* candy-stripe airmail border */
+  background: repeating-linear-gradient(-45deg, var(--color-text-accent) 0 10px, var(--color-bg-card) 10px 16px, var(--color-text-primary) 16px 26px, var(--color-bg-card) 26px 32px);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude;
+}
+.greeting p { margin: 0; }
+.greeting__tree { width: 74px; height: 110px; background: url(/assets/greeting-tree.webp) center / contain no-repeat; }
+.greeting__merry { font-size: var(--font-size-lg) !important; margin-top: 4px !important; }
+.greeting__sign { line-height: 1; }
+
+/* Wish detail sheet */
+.detail { display: grid; gap: var(--spacing-md); }
+.detail__photo { width: 100%; max-height: 260px; object-fit: cover; border-radius: var(--radius-sm); background: var(--color-bg-tag); }
+.detail__text { display: grid; gap: 12px; }
+.detail__text h2, .detail__text p { margin: 0; }
+.detail__meta { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.detail__chip { padding: 2px 8px; border-radius: var(--radius-sm); background: var(--color-bg-tag); color: var(--color-text-secondary); }
+.detail__note { display: grid; gap: 6px; padding: 12px 16px; background: var(--color-bg-page); border: 1px solid var(--color-border-default); border-radius: var(--radius-sm); }
+.home__own { margin: 12px 0 0; text-align: center; }
+
 /* ---------- Desktop */
 @media (min-width: 900px) {
   .desk-only { display: revert; }
@@ -451,4 +565,10 @@ textarea.input { resize: vertical; min-height: 96px; }
   .sheet[open] { animation: fade-in 0.15s ease-out; }
   .sheet__inner { padding: 28px 28px 28px; outline: 1.2px solid var(--color-text-primary); outline-offset: -8px; border-radius: 10px; }
   .sheet__handle { display: none; }
+
+  .reveal { grid-template-rows: 64px 1fr 64px; }
+  .reveal__title { font-size: 44px; }
+  .giftee__cols { grid-template-columns: 1fr 1fr; align-items: start; }
+  .detail:has(.detail__photo) { grid-template-columns: 180px 1fr; align-items: start; }
+  .detail__photo { aspect-ratio: 1; max-height: none; }
 }

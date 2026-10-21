@@ -74,3 +74,31 @@ export const organizer = {
   name: process.env.ORGANIZER_NAME?.trim() || "the organizer",
   messenger: process.env.ORGANIZER_MESSENGER_URL?.trim() || null,
 };
+
+export type Pairing = {
+  santa_id: string;
+  giftee_id: string;
+  envelope_opened_at: string | null;
+  box_opened_at: string | null;
+  last_seen_at: string | null;
+};
+
+export async function getPairing(santaId: string): Promise<Pairing | null> {
+  const [p] = await db.select<Pairing>("pairings", `santa_id=eq.${santaId}&select=*`);
+  return p ?? null;
+}
+
+/**
+ * Organizer-only rehearsal before the draw: pretend the draw happened and make
+ * this person their own Santa, so a preview never shows anyone else's box.
+ * Nothing is saved.
+ */
+export function previewGiftee(tree: TreePerson[], meId: string): TreePerson | null {
+  const me = tree.find((t) => t.id === meId);
+  return me?.posted ? me : null;
+}
+
+/** Changed after the draw = the Santa should know. */
+export function updatedSinceDraw(boxUpdatedAt: string | null, drawnAt: string | null): boolean {
+  return !!boxUpdatedAt && !!drawnAt && new Date(boxUpdatedAt).getTime() > new Date(drawnAt).getTime() + 60_000;
+}

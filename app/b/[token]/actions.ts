@@ -190,3 +190,14 @@ export async function saveLetter(token: string, fd: FormData): Promise<void> {
   if (intent === "wrap" && patch.posted_at) redirect(`/b/${token}?wrapped=1`);
   redirect(`/b/${token}?saved=1`);
 }
+
+// ---------- After the draw
+
+/** Remembers that this Santa broke their seal, so next time they land on the tree. */
+export async function openEnvelope(token: string): Promise<void> {
+  const p = await getPlayer(token);
+  if (!p) return;
+  await db.update("pairings", `santa_id=eq.${p.id}&envelope_opened_at=is.null`, {
+    envelope_opened_at: new Date().toISOString(),
+  });
+}

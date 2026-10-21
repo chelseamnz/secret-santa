@@ -237,6 +237,7 @@ export default async function OrganizerPage({ searchParams }: { searchParams: Se
                   confirmLabel="Start the draw"
                   action={startDraw}
                 />
+                <a href="/organizer/preview" className="link-action label-s preview-link">Preview the reveal</a>
               </>
             )}
           </div>

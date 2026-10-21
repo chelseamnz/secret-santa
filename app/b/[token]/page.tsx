@@ -1,7 +1,11 @@
 import Link from "next/link";
 import { capitalize, defaultLook, joinNames, numberWord } from "@/lib/catalog";
-import { getBox, getPlayer, getSettings, getTree, getWishes } from "@/lib/player";
-import { formatDateOnly, formatShort } from "@/lib/time";
+import { db } from "@/lib/db";
+import { isOrganizer } from "@/lib/organizer-auth";
+import { canEdit, getBox, getPairing, getPlayer, getSettings, getTree, getWishes, previewGiftee, updatedSinceDraw } from "@/lib/player";
+import { ago, daysUntilChristmasEve, formatDateOnly, formatShort } from "@/lib/time";
+import { PreviewBanner } from "../_ui/PreviewBanner";
+import { RevealEnvelope } from "../_ui/Reveal";
 import { CleanUrl, OpenedPing, WrapMoment } from "../_ui/client";
 import { LinkNotFound } from "../_ui/LinkNotFound";
 import { GiftBox, Postcard, TitleLabel } from "../_ui/pieces";
@@ -9,11 +13,11 @@ import { TreeStage } from "../_ui/TreeStage";
 
 export const dynamic = "force-dynamic";
 
-type Search = Promise<{ wrapped?: string; saved?: string }>;
+type Search = Promise<{ wrapped?: string; saved?: string; preview?: string }>;
 
 export default async function TreeHome({ params, searchParams }: { params: Promise<{ token: string }>; searchParams: Search }) {
   const { token } = await params;
-  const { wrapped, saved } = await searchParams;
+  const { wrapped, saved, preview: previewParam } = await searchParams;
   const me = await getPlayer(token);
   if (!me) return <LinkNotFound />;
 
@@ -27,19 +31,83 @@ export default async function TreeHome({ params, searchParams }: { params: Promi
   const drawLabel = settings.draw_date ? `The draw · ${formatDateOnly(settings.draw_date)}` : "The draw · soon";
   const titleLine = `${posted} of ${total} wishlists under the tree`;
 
-  if (settings.phase === "drawn") {
+  // ---------- After the draw (or the organizer's rehearsal of it)
+  const preview = !!previewParam && settings.phase === "open" && (await isOrganizer());
+  if (settings.phase === "drawn" || preview) {
+    let giftee = null as (typeof tree)[number] | null;
+    let opened = false;
+    if (preview) {
+      giftee = previewGiftee(tree, me.id);
+      opened = previewParam === "home";
+    } else {
+      const pairing = await getPairing(me.id);
+      giftee = pairing ? tree.find((t) => t.id === pairing.giftee_id) ?? null : null;
+      opened = !!pairing?.envelope_opened_at;
+    }
+
+    if (!giftee) {
+      return (
+        <main className="lost stripes">
+          <Postcard className="lost__card">
+            <p className="label-s accent">{preview ? "Preview" : "The names are drawn"}</p>
+            <h2 className="display-m">{preview ? "No boxes to draw yet" : "Your envelope is on its way"}</h2>
+            <p className="body-m muted">
+              {preview ? "Wrap and post this box first, then preview the reveal." : "Check back soon to find out who you're Santa for."}
+            </p>
+          </Postcard>
+        </main>
+      );
+    }
+
+    if (!opened) {
+      return (
+        <>
+          {preview && <PreviewBanner />}
+          <RevealEnvelope token={token} me={me.name} giftee={giftee.name} preview={preview} />
+        </>
+      );
+    }
+
+    const [gBox] = await db.select<{ updated_at: string }>("boxes", `person_id=eq.${giftee.id}&select=updated_at`);
+    const updated = !preview && updatedSinceDraw(gBox?.updated_at ?? null, settings.drawn_at);
+    const days = daysUntilChristmasEve();
+    const q = preview ? "?preview=1" : "";
     return (
       <main className="home">
-        <div className="home__title"><TitleLabel line={`${total} of ${total} wishlists under the tree`} /></div>
-        <section className="home__tree">
-          <TreeStage spots={tree} meId={me.id} />
+        {preview && <PreviewBanner />}
+        {!preview && <OpenedPing token={token} />}
+        <div className="home__title"><TitleLabel line={`${total} of ${total}  ·  the draw is done`} /></div>
+        <section className="home__tree" aria-label="The tree">
+          <TreeStage spots={tree} meId={me.id} initialTag={giftee.id} caption="Tap a box to see whose it is." />
         </section>
         <div className="home__card">
-          <Postcard>
-            <p className="label-s accent">The names are drawn</p>
-            <h2 className="display-m">Your envelope is on its way</h2>
-            <p className="body-m muted">Check back soon to find out who you&apos;re Santa for.</p>
+          <Postcard className="status">
+            <p className="label-s accent desk-only">
+              The draw is done{days > 0 ? `  ·  ${days} ${days === 1 ? "day" : "days"} to go` : ""}
+            </p>
+            <h2 className="display-m home__h">You&apos;re Santa for {giftee.name}</h2>
+            <p className="body-s muted home__p">
+              {updated ? `${giftee.name} updated their box ${ago(gBox!.updated_at)}.` : `Everything ${giftee.name} wished for is inside.`}
+            </p>
+            {giftee.paper && giftee.bow && (
+              <div className="yourbox desk-only">
+                <GiftBox paper={giftee.paper} bow={giftee.bow} className="yourbox__img" />
+                <span>
+                  <b className="button-m">{giftee.name}&apos;s box</b>
+                  <span className="body-s muted">{updated ? `Updated ${ago(gBox!.updated_at)}` : "Wrapped and waiting"}</span>
+                </span>
+              </div>
+            )}
+            <div className="row-between">
+              <p className="label-s accent">Exchange · Dec 24</p>
+              <Link href={`/b/${token}/giftee${q}`} className="button button--primary button-m">Open {giftee.name}&apos;s box</Link>
+            </div>
           </Postcard>
+          {!preview && canEdit(settings) && (
+            <p className="home__own body-s muted">
+              Need to change your own wishlist? <Link href={`/b/${token}/edit`} className="accent">Edit my box</Link>
+            </p>
+          )}
         </div>
       </main>
     );

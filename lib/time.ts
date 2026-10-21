@@ -53,3 +53,22 @@ export function formatDateOnly(date: string | null): string {
     day: "numeric",
   }).format(new Date(Date.UTC(y, m - 1, d)));
 }
+
+/** "today", "yesterday", "3 days ago", "2 hours ago" — for Updated tags. */
+export function ago(iso: string | null, now = Date.now()): string {
+  if (!iso) return "";
+  const mins = Math.max(0, Math.round((now - new Date(iso).getTime()) / 60000));
+  if (mins < 2) return "just now";
+  if (mins < 60) return `${mins} minutes ago`;
+  const hours = Math.round(mins / 60);
+  if (hours < 24) return hours === 1 ? "an hour ago" : `${hours} hours ago`;
+  const days = Math.round(hours / 24);
+  return days === 1 ? "yesterday" : `${days} days ago`;
+}
+
+/** Whole days from today (Manila) until Dec 24 of this year (0 on the day). */
+export function daysUntilChristmasEve(now = new Date()): number {
+  const today = new Date(toManilaInput(now.toISOString()).slice(0, 10) + "T00:00:00Z");
+  const eve = new Date(Date.UTC(today.getUTCFullYear(), 11, 24));
+  return Math.max(0, Math.round((eve.getTime() - today.getTime()) / 86400000));
+}

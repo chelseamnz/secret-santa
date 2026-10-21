@@ -36,13 +36,16 @@ export async function startSession(): Promise<void> {
     httpOnly: true,
     secure: true,
     sameSite: "lax",
-    path: "/organizer",
+    // Site-wide so the organizer can preview player screens (before the draw only).
+    path: "/",
     maxAge: MAX_AGE,
   });
 }
 
 export async function endSession(): Promise<void> {
-  (await cookies()).delete({ name: COOKIE, path: "/organizer" });
+  const jar = await cookies();
+  jar.delete({ name: COOKIE, path: "/" });
+  jar.delete({ name: COOKIE, path: "/organizer" }); // older sessions
 }
 
 export async function requireOrganizer(): Promise<void> {
