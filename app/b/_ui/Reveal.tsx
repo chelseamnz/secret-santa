@@ -80,7 +80,7 @@ export function RevealEnvelope({
     setTimeout(() => router.push(href), LEAVE_MS);
   }
 
-  const caption = stage === "slice" ? "Slicing it open…" : stage === "open" ? "Opening…" : null;
+  const caption = stage === "slice" ? "Slicing it open…" : stage === "open" ? "Who could it be…" : null;
   const nameSize = giftee.length > 16 ? "is-long" : giftee.length > 11 ? "is-mid" : "";
 
   return (
