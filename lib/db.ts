@@ -14,7 +14,7 @@ export class DbError extends Error {
   }
 }
 
-function headers(extra?: Record<string, string>): Record<string, string> {
+export function headers(extra?: Record<string, string>): Record<string, string> {
   if (!URL_ || !KEY) {
     throw new DbError(
       "Database keys are missing. Check the Vercel environment variables.",
@@ -68,6 +68,13 @@ export const db = {
       body: JSON.stringify(row),
       prefer: "return=minimal",
     }),
+  /** Insert, or update the existing row with the same primary key. */
+  upsert: (table: string, row: Record<string, unknown>) =>
+    request<void>(table, {
+      method: "POST",
+      body: JSON.stringify(row),
+      prefer: "resolution=merge-duplicates,return=minimal",
+    }),
   update: (table: string, filter: string, patch: Record<string, unknown>) =>
     request<void>(`${table}?${filter}`, {
       method: "PATCH",
@@ -112,4 +119,27 @@ export type StatusRow = {
   status: PersonStatus;
   posted_at: string | null;
   box_updated_at: string | null;
+};
+
+export type BoxRow = {
+  person_id: string;
+  paper: string;
+  bow: string;
+  letter: string | null;
+  posted_at: string | null;
+  updated_at: string;
+};
+
+export type WishRow = {
+  id: string;
+  person_id: string;
+  kind: "store" | "heart";
+  title: string;
+  price_php: number | null;
+  url: string | null;
+  note: string | null;
+  photo_path: string | null;
+  heart_key: string | null;
+  sort_order: number;
+  created_at: string;
 };
