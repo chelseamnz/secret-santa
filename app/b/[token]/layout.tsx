@@ -11,7 +11,7 @@ export const metadata: Metadata = {
     siteName: "Secret Santa 2026",
     title: "Secret Santa 2026",
     description: "Wrap your box, fill it with wishes, and join the family under the tree.",
-    images: [{ url: "/og.jpg", secureUrl: "/og.jpg", type: "image/jpeg", width: 1200, height: 630, alt: "Secret Santa 2026" }],
+    images: [{ url: "/og.jpg", type: "image/jpeg", width: 1200, height: 630, alt: "Secret Santa 2026" }],
   },
 };
 
