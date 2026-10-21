@@ -481,7 +481,9 @@ textarea.input { resize: vertical; min-height: 96px; }
 /* between beats: the current beat and its caption fade out together */
 .reveal.is-exiting .reveal__stage,
 .reveal.is-exiting .reveal__caption,
-.reveal.is-exiting .reveal__skip { animation: beat-out 0.8s var(--ease-glide) forwards; }
+.reveal.is-exiting .reveal__skip,
+.reveal.is-caption-out .reveal__caption,
+.reveal.is-caption-out .reveal__skip { animation: beat-out 0.8s var(--ease-glide) forwards; }
 .reveal__sealed { position: relative; padding: 0; border: 0; background: none; cursor: pointer; align-self: start; margin-top: 12px; }
 .reveal__sealed:disabled { cursor: default; }
 .reveal__sealed:not(:disabled):hover { transform: translateY(-2px); transition: transform 0.3s var(--ease-arrive); }
@@ -538,12 +540,15 @@ textarea.input { resize: vertical; min-height: 96px; }
 .reveal-card__name { font-family: var(--font-family-script); font-size: 48px; line-height: 1.15; color: var(--color-text-primary); white-space: nowrap; }
 .reveal-card__name.is-mid { font-size: 40px; }
 .reveal-card__name.is-long { font-size: 32px; white-space: normal; max-width: 240px; }
+.reveal-card-wrap:not(.is-out) .reveal-card__name,
+.reveal-card-wrap:not(.is-out) .label-m { opacity: 0; }
+.is-out .reveal-card .label-m { animation: fade-in 0.9s var(--ease-glide) 0.4s both; }
 .is-out .reveal-card__name { animation: name-in 1.4s var(--ease-arrive) 1.1s both; }
 .reveal__opened .sparkle { z-index: 4; }
 .reveal__actions { display: grid; gap: 12px; justify-items: center; }
 .reveal__actions p { margin: 0; }
 .reveal__actions--late { animation: caption-in 0.9s var(--ease-arrive) 2.6s both; }
-.reveal__skip { margin: 0; }
+.reveal__skip { margin: 36px 0 0; }
 
 /* rises inside the pocket (behind the front), then steps in front once clear */
 @keyframes card-out {
@@ -651,7 +656,8 @@ textarea.input { resize: vertical; min-height: 96px; }
   .moment__scene { transform: scale(1.5); }
 
   .reveal { grid-template-rows: 64px 1fr 64px; }
-  .reveal__stage { transform: scale(1.35); margin: 40px 0; }
+  .reveal__stage { transform: scale(1.35); margin: 56px 0; }
+  .reveal__skip { margin-top: 48px; }
   .reveal__title { font-size: 44px; }
   .giftee__cols { grid-template-columns: 1fr 1fr; align-items: start; }
   .detail:has(.detail__photo) { grid-template-columns: 180px 1fr; align-items: start; }

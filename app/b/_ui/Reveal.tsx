@@ -11,7 +11,7 @@ import { openEnvelope } from "../[token]/actions";
 
 type Stage = "sealed" | "slice" | "open" | "card";
 const SLICE_MS = 4600;
-const OPEN_MS = 2600;
+const OPEN_MS = 2400; // the open envelope with the card waiting inside
 const EXIT_MS = 800;
 const LEAVE_MS = 650;
 
@@ -37,6 +37,7 @@ export function RevealEnvelope({
   const router = useRouter();
   const [stage, setStage] = useState<Stage>("sealed");
   const [exiting, setExiting] = useState(false);
+  const [captionOut, setCaptionOut] = useState(false);
   const [leaving, setLeaving] = useState(false);
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
   const href = `/b/${token}/giftee${preview ? "?preview=1" : ""}`;
@@ -58,14 +59,16 @@ export function RevealEnvelope({
     setStage("slice");
     at(SLICE_MS - EXIT_MS, () => setExiting(true));
     at(SLICE_MS, () => { setExiting(false); setStage("open"); });
-    at(SLICE_MS + OPEN_MS - EXIT_MS, () => setExiting(true));
-    at(SLICE_MS + OPEN_MS, () => { setExiting(false); setStage("card"); });
+    // no fade between "open" and "card": the card simply rises out of the envelope
+    at(SLICE_MS + OPEN_MS - EXIT_MS, () => setCaptionOut(true));
+    at(SLICE_MS + OPEN_MS, () => setStage("card"));
   }
 
   function skip() {
     if (stage === "slice" || stage === "open") {
       timers.current.forEach(clearTimeout);
       setExiting(false);
+      setCaptionOut(true);
       setStage("card");
     }
   }
@@ -81,7 +84,7 @@ export function RevealEnvelope({
   const nameSize = giftee.length > 16 ? "is-long" : giftee.length > 11 ? "is-mid" : "";
 
   return (
-    <main className={`reveal ${exiting ? "is-exiting" : ""} ${leaving ? "is-leaving" : ""}`} onClick={skip}>
+    <main className={`reveal ${exiting ? "is-exiting" : ""} ${captionOut ? "is-caption-out" : ""} ${leaving ? "is-leaving" : ""}`} onClick={skip}>
       <div className="reveal__band stripes" aria-hidden />
       <section className="reveal__body">
         {stage === "sealed" && (
@@ -92,7 +95,7 @@ export function RevealEnvelope({
         )}
         {caption && <p className="reveal__caption script-m" key={stage}>{caption}</p>}
 
-        <div className={`reveal__stage is-${stage}`} key={`stage-${stage === "slice" ? "sealed" : stage}`}>
+        <div className={`reveal__stage is-${stage}`} key={stage === "sealed" || stage === "slice" ? "stage-sealed" : "stage-open"}>
           {(stage === "sealed" || stage === "slice") && (
             <button type="button" className="reveal__sealed" onClick={start} aria-label="Break the seal" disabled={stage !== "sealed"}>
               <OpenerStage slicing={stage === "slice"} />
@@ -102,8 +105,8 @@ export function RevealEnvelope({
           {(stage === "open" || stage === "card") && (
             <div className="reveal__opened">
               <img className="reveal__env" src="/assets/envelope-red-opened.webp" alt="" />
-              {stage === "card" && (
-                <div className="reveal-card-wrap is-out">
+              {(stage === "open" || stage === "card") && (
+                <div className={`reveal-card-wrap ${stage === "card" ? "is-out" : ""}`}>
                   <div className="reveal-card">
                     <span className="reveal-card__bells" aria-hidden />
                     <span className="label-m accent">You&apos;re Santa for</span>
