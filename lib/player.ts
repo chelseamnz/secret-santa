@@ -65,7 +65,7 @@ export async function getWishes(personId: string): Promise<Wish[]> {
   return rows.map((w) => ({ ...w, photo_url: w.photo_path ? urls[w.photo_path] ?? null : null }));
 }
 
-/** Players can change their box until the Dec 24 reveal. */
+/** Players can change their box until the reveal (Dec 25). */
 export function canEdit(s: Settings): boolean {
   return !s.reveal_at || Date.now() < new Date(s.reveal_at).getTime();
 }

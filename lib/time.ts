@@ -66,9 +66,19 @@ export function ago(iso: string | null, now = Date.now()): string {
   return days === 1 ? "yesterday" : `${days} days ago`;
 }
 
-/** Whole days from today (Manila) until Dec 24 of this year (0 on the day). */
-export function daysUntilChristmasEve(now = new Date()): number {
-  const today = new Date(toManilaInput(now.toISOString()).slice(0, 10) + "T00:00:00Z");
-  const eve = new Date(Date.UTC(today.getUTCFullYear(), 11, 24));
-  return Math.max(0, Math.round((eve.getTime() - today.getTime()) / 86400000));
+/** The exchange/reveal day: the reveal time from Settings, or Dec 25 until it's set. */
+export function exchangeDate(revealAt: string | null, now = new Date()): Date {
+  if (revealAt) return new Date(revealAt);
+  return new Date(`${toManilaInput(now.toISOString()).slice(0, 4)}-12-25T00:00:00+08:00`);
+}
+
+/** "Dec 25" */
+export function exchangeLabel(revealAt: string | null): string {
+  return formatShort(exchangeDate(revealAt).toISOString());
+}
+
+/** Whole days from today until the exchange day, both counted in Manila (0 on the day). */
+export function daysUntilExchange(revealAt: string | null, now = new Date()): number {
+  const day = (d: Date) => new Date(toManilaInput(d.toISOString()).slice(0, 10) + "T00:00:00Z").getTime();
+  return Math.max(0, Math.round((day(exchangeDate(revealAt, now)) - day(now)) / 86400000));
 }

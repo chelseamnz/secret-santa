@@ -3,7 +3,7 @@ import { capitalize, defaultLook, joinNames, numberWord } from "@/lib/catalog";
 import { db } from "@/lib/db";
 import { isOrganizer } from "@/lib/organizer-auth";
 import { canEdit, getBox, getPairing, getPlayer, getSettings, getTree, getWishes, previewGiftee, updatedSinceDraw } from "@/lib/player";
-import { ago, daysUntilChristmasEve, formatDateOnly, formatShort } from "@/lib/time";
+import { ago, daysUntilExchange, exchangeLabel, formatDateOnly, formatShort } from "@/lib/time";
 import { PreviewBanner } from "../_ui/PreviewBanner";
 import { RevealEnvelope } from "../_ui/Reveal";
 import { CleanUrl, OpenedPing, WrapMoment } from "../_ui/client";
@@ -70,7 +70,7 @@ export default async function TreeHome({ params, searchParams }: { params: Promi
 
     const [gBox] = await db.select<{ updated_at: string }>("boxes", `person_id=eq.${giftee.id}&select=updated_at`);
     const updated = !preview && updatedSinceDraw(gBox?.updated_at ?? null, settings.drawn_at);
-    const days = daysUntilChristmasEve();
+    const days = daysUntilExchange(settings.reveal_at);
     const q = preview ? "?preview=1" : "";
     return (
       <main className="home">
@@ -99,7 +99,7 @@ export default async function TreeHome({ params, searchParams }: { params: Promi
               </div>
             )}
             <div className="row-between">
-              <p className="label-s accent">Exchange · Dec 24</p>
+              <p className="label-s accent">Exchange · {exchangeLabel(settings.reveal_at)}</p>
               <Link href={`/b/${token}/giftee${q}`} className="button button--primary button-m">Open {giftee.name}&apos;s box</Link>
             </div>
           </Postcard>
@@ -173,7 +173,7 @@ export default async function TreeHome({ params, searchParams }: { params: Promi
             <Link href={next} className="button button--primary button-m full">
               {box ? "Keep wrapping" : "Wrap my box"}
             </Link>
-            <p className="label-s muted">{drawLabel} &nbsp;·&nbsp; Exchange · Dec 24</p>
+            <p className="label-s muted">{drawLabel} &nbsp;·&nbsp; Exchange · {exchangeLabel(settings.reveal_at)}</p>
           </Postcard>
         ) : (
           <Postcard className="status">

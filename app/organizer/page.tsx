@@ -254,7 +254,7 @@ export default async function OrganizerPage({ searchParams }: { searchParams: Se
               <input name="draw_date" type="date" defaultValue={settings?.draw_date ?? ""} className="input body-m" />
             </label>
             <label className="field">
-              <span className="button-m">Reveal on Dec 24 at (Manila time)</span>
+              <span className="button-m">Reveal &amp; exchange (Manila time)</span>
               <input name="reveal_at" type="datetime-local" defaultValue={toManilaInput(settings?.reveal_at ?? null)} className="input body-m" />
             </label>
             <PendingButton label="Save settings" className="button button--secondary button-m full" />

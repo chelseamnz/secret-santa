@@ -44,7 +44,7 @@ export default function Home() {
             The tree is being decorated. Your link will arrive in Messenger soon.
           </p>
           <p className="label-s" style={{ margin: 0, color: "var(--color-text-accent)" }}>
-            Exchange · Dec 24
+            Exchange · Dec 25
           </p>
         </div>
       </section>
