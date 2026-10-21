@@ -35,6 +35,7 @@ const SPARKLES: [number, number, number, number][] = [
   [146, 146, 20, 4.8], [234, 254, 20, 4.45],
 ];
 const FADE_MS = 1000;
+const EXIT_MS = 800; // each beat fades out over this long before the next begins
 
 // Fairy lights around the sealed envelope: an oval of small warm lights that
 // blink on one by one. [left, top, delay(s)] in the 280×340 scene.
@@ -62,6 +63,7 @@ export function WrapMoment({
 }) {
   const [scene, setScene] = useState(0);
   const [leaving, setLeaving] = useState(false);
+  const [exiting, setExiting] = useState(false);
   const [done, setDone] = useState(false);
 
   useEffect(() => {
@@ -72,7 +74,9 @@ export function WrapMoment({
     const timers: ReturnType<typeof setTimeout>[] = [];
     let at = 0;
     SCENES.forEach((sc, i) => {
-      timers.push(setTimeout(() => setScene(i), at));
+      timers.push(setTimeout(() => { setExiting(false); setScene(i); }, at));
+      // every beat but the last fades out before the next one comes in
+      if (i < SCENES.length - 1) timers.push(setTimeout(() => setExiting(true), at + sc.ms - EXIT_MS));
       at += sc.ms;
     });
     timers.push(setTimeout(() => setLeaving(true), at));
@@ -87,7 +91,7 @@ export function WrapMoment({
 
   if (done) return null;
   return (
-    <div className={`moment ${leaving ? "is-leaving" : ""}`} onClick={skip} role="dialog" aria-label="Wrapping your box">
+    <div className={`moment ${leaving ? "is-leaving" : ""} ${exiting ? "is-exiting" : ""}`} onClick={skip} role="dialog" aria-label="Wrapping your box">
       <p className="moment__caption script-m" key={scene}>{SCENES[scene].caption}</p>
       <div className="moment__stage">
         {scene === 0 && (
