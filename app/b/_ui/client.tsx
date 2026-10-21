@@ -21,20 +21,20 @@ export function CleanUrl() {
   return null;
 }
 
-// Each beat gets time to land. Total ≈ 9.5s, then a soft fade to the tree.
+// Each beat gets time to land. Total ≈ 18s, then a slow fade to the tree.
 const SCENES = [
-  { caption: "Tucking in your letter…", ms: 2200 },
-  { caption: "Sealing it with wax…", ms: 2400 },
-  { caption: "Tucked under your ribbon…", ms: 2000 },
-  { caption: "Off it goes, under the tree!", ms: 3800 },
+  { caption: "Tucking in your letter…", ms: 4000 },
+  { caption: "Sealing it with wax…", ms: 4000 },
+  { caption: "Tucked under your ribbon…", ms: 4000 },
+  { caption: "Off it goes, under the tree!", ms: 6800 },
 ];
 // Twinkles around the tree once the box lands: [left, top, size, delay(s)].
 const SPARKLES: [number, number, number, number][] = [
-  [44, 112, 28, 2.0], [200, 80, 32, 2.15], [126, 22, 24, 2.3], [70, 214, 22, 2.4],
-  [210, 190, 28, 2.25], [96, 290, 24, 2.1], [178, 280, 26, 2.45], [22, 262, 18, 2.55],
-  [146, 146, 20, 2.6], [234, 254, 20, 2.35],
+  [44, 112, 28, 3.4], [200, 80, 32, 3.6], [126, 22, 24, 3.8], [70, 214, 22, 3.95],
+  [210, 190, 28, 3.7], [96, 290, 24, 3.5], [178, 280, 26, 4.0], [22, 262, 18, 4.1],
+  [146, 146, 20, 4.2], [234, 254, 20, 3.85],
 ];
-const FADE_MS = 700;
+const FADE_MS = 1000;
 
 /** The wrapping moment after "Wrap it up". Tap anywhere to skip. */
 export function WrapMoment({
@@ -70,7 +70,7 @@ export function WrapMoment({
 
   function skip() {
     setLeaving(true);
-    setTimeout(() => setDone(true), 350);
+    setTimeout(() => setDone(true), 600);
   }
 
   if (done) return null;
